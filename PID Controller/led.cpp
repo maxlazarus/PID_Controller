@@ -1,9 +1,7 @@
-
 #include "led.h"
 #include <avr/io.h>
 
-
-LED::LED (unsigned char  p,int x)
+LED::LED (unsigned char  p,unsigned int  x)
 {	
 	PORT = p;
 	PIN = x;

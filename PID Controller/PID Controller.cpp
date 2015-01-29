@@ -3,6 +3,9 @@
  *
  * Created: 1/23/2015 9:28:17 AM
  *  Author: Maxim
+ *
+ *  Nano pinout:
+ *	 D2:	Hall Effect input
  */ 
 
 
@@ -12,88 +15,73 @@
 #include <string.h>
 #include <stdio.h>
 #include <util/delay.h> 
+#include <avr/interrupt.h>
 #include "led.h"
 #include "usart.h"
+#include "PWM.h"
 
 LED led1(0x05,5);
+PWM pwm0(0);
+bool flip = false;
 
-unsigned int TIM16_ReadTCNT1( void )
-{
+void print(const char* name, unsigned int reg){
+	USART_Send_string(name);
+	USART_Send_int(reg);
+	USART_Send_string("\n");
+}
+void print(const char* name){
+	USART_Send_string(name);
+	USART_Send_string("\n");
+}
+
+ISR(INT0_vect) {
+	print("INT0 triggered");
+}
+
+ISR(TIMER0_COMPA_vect) {	
+}
+
+ISR(TIMER0_OVF_vect) {
+}
+
+unsigned int TIM16_ReadTCNT1( void ) {
 	unsigned char sreg;
 	unsigned int i;
-	/* Save global interrupt flag */
-	sreg = SREG;
-	/* Disable interrupts */
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11!!!!!!!!!!!!!!
-	//_CLI();
-	
-	/* Read TCNT1 into i */
-	i = TCNT1;
-	/* Restore global interrupt flag */
-	SREG = sreg;
+	sreg = SREG; // global interrupt flags saved
+	cli(); // disable interrupts
+	i = TCNT1; 
+	SREG = sreg; // global interrupt flags restored
+	sei();
 	return i;
 }
 
-int main(void)
-{
-	// INITIALIZATIONS
-	DDRB = 0b00100000;	//B5 output: board LED
-	DDRD = 0b11111100;
+int main(void) {
+	DDRB = 0b11111111;	//B5 output: board LED
+	DDRD = 0b11111111;
+	PORTD = 0xff;
 	USART_Init(MYUBRR); // Initializes the serial communication
-	// Go to USART.H AND CHANGE YOUR FOSC AND BAUD
-	TCCR0A = 0x00;
 	int interval = 1;
 	uint8_t dir = 0b00001000;
 	uint8_t mask = 0b00000000;
 	ADMUX = 0b1100000;
 	ADCSRA = 0b10000011;
 	ADCSRB = 0b00000000;
-	PRR = 0;//&= ~(1<<PRADC);
-	char output[8];
-	sprintf(output, "%d", PRR);
-	unsigned int test;
+
+	SREG = SREG | 0x80;
+	sei(); // enable global interrupts
 	
-    while(1)
-    {
-		//led1.on();
-		PORTD = 0x04 | mask;
-		char str0[8];
-		char str1[8];
-		
-		test = ADCH;
-		ADCSRA = 0b11000011;
-		/*
-		int counter = 0;
-		while ((ADCSRA & (1<<ADSC)) > 0) {
-			sprintf(output, "%d", counter);
-			USART_Send_string("\nwaiting...");
-			USART_Send_string(output);
-			USART_Send_string("\n");
-			counter++;
-		}
-		*/
-		sprintf(str0, "%d", test);
-		if(test <= 127)
-			mask = dir;
-		else {
-			mask = 0;
-			test = 255 - test;
-		} 
-		
-		interval = (test + 32) / 32;	
-
-		/*
-        USART_Send_string("A0: ");
-		USART_Send_string(str0);
-		USART_Send_string("\n");
-		*/
-
-		for(int i = 0; i < interval; i++)
-			_delay_us(250);	
-		//led1.off();
-		PORTD = 0 | mask;
-
-		for(int i = 0; i < interval; i++)
-			_delay_us(250);
+    while(1) {
+		OCR0A = 64;
+		_delay_ms(1000);
+		OCR0A = 100;
+		_delay_ms(1000);
+		OCR0A = 127;
+		_delay_ms(1000);
+		OCR0A = 192;
+		_delay_ms(1000);
+		OCR0A = 154;
+		_delay_ms(1000);
+		OCR0A = 127;
+		_delay_ms(1000);
     }
 }

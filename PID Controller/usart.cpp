@@ -21,9 +21,6 @@ UCSR0B = (1<<RXEN0)|(1<<TXEN0);
 UCSR0C = (1<<USBS0)|(3<<UCSZ00);
 }
 
-
-
-
 void USART_Sendbyte( unsigned char data )
 {
 /* Wait for empty transmit buffer */
@@ -35,10 +32,8 @@ UDR0 = char(data);
 
 void USART_Send_string(const char *str)
 {
-
 	  while (*str) 
-      USART_Sendbyte(*str++);
-	
+      USART_Sendbyte(*str++);	
 }
 
 void USART_Send_int(unsigned int d )
@@ -46,10 +41,7 @@ void USART_Send_int(unsigned int d )
 	char str[10];
 	sprintf(str,"%u",d);
 	USART_Send_string(str);
-	
 }
-
-
 
 unsigned char USART_Receive( void )
 {

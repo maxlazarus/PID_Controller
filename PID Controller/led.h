@@ -5,10 +5,10 @@ using namespace std;
 
 class LED
 {
-	int PIN;
+	unsigned int  PIN;
 	unsigned char PORT;
 	public:
-		LED(unsigned char,int);
+		LED(unsigned char,unsigned int );
 		void on(void);
 		void off(void);	
 };

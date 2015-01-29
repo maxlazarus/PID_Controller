@@ -119,8 +119,33 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="led.cpp">
+      <SubType>compile</SubType>
+      <Link>led.cpp</Link>
+    </Compile>
+    <Compile Include="led.h">
+      <SubType>compile</SubType>
+      <Link>led.h</Link>
+    </Compile>
     <Compile Include="PID Controller.cpp">
       <SubType>compile</SubType>
+      <Link>PID Controller.cpp</Link>
+    </Compile>
+    <Compile Include="PWM.cpp">
+      <SubType>compile</SubType>
+      <Link>PWM.cpp</Link>
+    </Compile>
+    <Compile Include="PWM.h">
+      <SubType>compile</SubType>
+      <Link>PWM.h</Link>
+    </Compile>
+    <Compile Include="usart.cpp">
+      <SubType>compile</SubType>
+      <Link>usart.cpp</Link>
+    </Compile>
+    <Compile Include="usart.h">
+      <SubType>compile</SubType>
+      <Link>usart.h</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
