@@ -10,7 +10,6 @@
  *   D6:	PWM0 out
  */ 
 
-
 #define F_CPU 16000000L
 #include <avr/io.h>
 #include <math.h>
@@ -35,17 +34,6 @@ void print(const char* name){
 	USART_Send_string(name);
 	USART_Send_string("\n");
 }
-
-ISR(INT0_vect) {
-	print("INT0 triggered");
-}
-
-ISR(TIMER0_COMPA_vect) {	
-}
-
-ISR(TIMER0_OVF_vect) {
-}
-
 unsigned int TIM16_ReadTCNT1( void ) {
 	unsigned char sreg;
 	unsigned int i;
@@ -57,11 +45,31 @@ unsigned int TIM16_ReadTCNT1( void ) {
 	return i;
 }
 
+class Motor {
+	public:
+		// accepts a decimal between -1 (full reverse) and 1 (full forward)
+		static void setSpeed(double d) {
+			USART_Sendbyte((unsigned short)(192 + (d * 63.5)));
+		}
+};
+
+ISR(INT0_vect) {
+	//print("INT0 triggered");
+}
+ISR(TIMER0_COMPA_vect) {}
+ISR(TIMER0_OVF_vect) {}
+
 int main(void) {
+	
+	pwm0.setDuty(0.5);
+	
 	DDRB = 0b11111111;	//B5 output: board LED
 	DDRD = 0b11111111;
+	DDRC = 0b11111111;
 	PORTD = 0xff;
-	USART_Init(MYUBRR); // Initializes the serial communication
+	
+	USART_Init(convertBaud(9600));
+	
 	int interval = 1;
 	uint8_t dir = 0b00001000;
 	uint8_t mask = 0b00000000;
@@ -73,17 +81,11 @@ int main(void) {
 	sei(); // enable global interrupts
 	
     while(1) {
-		OCR0A = 64;
 		_delay_ms(1000);
-		OCR0A = 100;
+		Motor::setSpeed(-1);
 		_delay_ms(1000);
-		OCR0A = 127;
+		Motor::setSpeed(1);
 		_delay_ms(1000);
-		OCR0A = 192;
-		_delay_ms(1000);
-		OCR0A = 154;
-		_delay_ms(1000);
-		OCR0A = 127;
-		_delay_ms(1000);
+		Motor::setSpeed(0);
     }
 }

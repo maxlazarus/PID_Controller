@@ -1,13 +1,12 @@
 ﻿#include "PWM.h"
 #include <avr/io.h>
 
-PWM::PWM (unsigned short i) {
-	unsigned short PWM_number = i;
+PWM::PWM (unsigned short u) {
+	PWM_number = u;
 	static bool initialized = false;
 	if(!initialized)
 		PWM::init();
 	init(PWM_number);
-	unsigned int compare = 0xff;
 }
 
 void PWM::init() {
@@ -31,17 +30,17 @@ void PWM::init() {
 	*/
 }
 
-void PWM::init(unsigned short i) {
-	if(i == 0) { // init counter0 on pin D6
+void PWM::init(unsigned short u) {
+	if(u == 0) { // init counter0 on pin D6
 		OCR0A = 0x20;
 		OCR0B = 0x7f;
 		TCCR0A = 0;
 		TCCR0B = 0;
 		TCCR0A = (1 << COM0A1) | (0b11); // toggle pin D6 on match, TOP = OCR0A
-		TCCR0B = (0 << WGM02) | (0b00000010); // toggle part above, clk/8 prescaler
+		TCCR0B = (0 << WGM02) | (0b0000001); // toggle part above, clk/1 prescaler
 		TIMSK0 = (1 << OCIE1A); // output compare match A interrupt enable
 		TIMSK0 |= (1 << TOIE0); // overflow interrupt enable
-	} if (i == 1) {
+	} if (u == 1) {
 		TCCR1A = 0;
 		TCCR1B = 0;  
 		TCCR1B |= (1 << WGM12);
@@ -56,5 +55,10 @@ unsigned int PWM::read() {
 	//TIFR1;
 	TCNT1 = 0x1ff;
 	return TCNT1;
+}
+
+void PWM::setDuty(double d) {
+	if(PWM_number == 0)
+		OCR0A = (unsigned int)(0xff * d);
 }
 
