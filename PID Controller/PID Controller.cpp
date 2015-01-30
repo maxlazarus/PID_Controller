@@ -2,10 +2,12 @@
  * PID_Controller.cpp
  *
  * Created: 1/23/2015 9:28:17 AM
- *  Author: Maxim
+ *  Author: Max Prokopenko
+ *  max@theprogrammingclub.com
  *
  *  Nano pinout:
  *	 D2:	Hall Effect input
+ *   D6:	PWM0 out
  */ 
 
 
