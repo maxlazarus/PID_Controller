@@ -3,12 +3,12 @@
  *
  * Created: 07/12/2011 15:17:35
  *  Author: Boomber
- */ 
+ */
 #include "usart.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
-#include <stdio.h>			// Conversions
+#include <stdio.h> // Conversions
 
 unsigned int convertBaud(unsigned int baud) {
 	return (((((FOSC * 10) / (16L * baud)) + 5) / 10) - 1);
@@ -30,8 +30,8 @@ void USART_Sendbyte(unsigned char data) {
 }
 
 void USART_Send_string(const char *str) {
-	  while (*str) 
-      USART_Sendbyte(*str++);	
+	while (*str) 
+	USART_Sendbyte(*str++);	
 }
 
 void USART_Send_int(unsigned int u) {

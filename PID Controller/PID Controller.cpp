@@ -62,13 +62,18 @@ ISR(TIMER0_OVF_vect) {}
 int main(void) {
 	
 	pwm0.setDuty(0.5);
+	pwm0.setPrescaler(1);
+	pwm0.start();
 	
-	DDRB = 0b11111111;	//B5 output: board LED
+	DDRB = 0b11110000;	//B5 output: board LED
 	DDRD = 0b11111111;
-	DDRC = 0b11111111;
+	DDRC = 0b11110000;
 	PORTD = 0xff;
 	
-	USART_Init(convertBaud(9600));
+	//-Ulfuse:w:0x22:m
+	
+	//USART_Init(convertBaud(9600)); // motor serial speed
+	USART_Init(convertBaud(57600));
 	
 	int interval = 1;
 	uint8_t dir = 0b00001000;
@@ -79,6 +84,28 @@ int main(void) {
 
 	SREG = SREG | 0x80;
 	sei(); // enable global interrupts
+	long count = 0;
+	
+	while(1) {
+		count = 0;
+		USART_Send_string("HELLO\n");
+		
+		PORTD = 0b00001000 | (PORTD & 0b11110011);
+		count = PINC | PINB<<4;
+		/*
+		PORTD = 0b00001100 | (PORTD & 0b11110011);
+		count = count<<8 | PINC | PINB<<4;
+		
+		PORTD = 0b00000000 | (PORTD & 0b11110011);
+		count = count<<8 | PINC | PINB<<4;
+
+		PORTD = 0b00000100 | (PORTD & 0b11110011);
+		count = count<<8 | PINC | PINB<<4;
+		*/
+		USART_Send_int(count);
+		USART_Send_string("\n");
+		_delay_ms(500);
+	}
 	
     while(1) {
 		_delay_ms(1000);

@@ -3,15 +3,14 @@
 
 PWM::PWM (unsigned short u) {
 	PWM_number = u;
-	static bool initialized = false;
-	if(!initialized)
-		PWM::init();
 	init(PWM_number);
 }
 
 void PWM::init() {
 	PRR = 0; // disable all power reduction
 	/*
+	
+	/////////////////FOR ROBOTS
 	PCINT0; // interrupt vector
 	EICRA = 0x01; // change on INT0 triggers interrupt
 	EIMSK = 0x01; // enable INTO0 interrupt
@@ -31,13 +30,14 @@ void PWM::init() {
 }
 
 void PWM::init(unsigned short u) {
+	PRR = 0;
+	setPrescaler(1);
 	if(u == 0) { // init counter0 on pin D6
 		OCR0A = 0x20;
 		OCR0B = 0x7f;
 		TCCR0A = 0;
 		TCCR0B = 0;
 		TCCR0A = (1 << COM0A1) | (0b11); // toggle pin D6 on match, TOP = OCR0A
-		TCCR0B = (0 << WGM02) | (0b0000001); // toggle part above, clk/1 prescaler
 		TIMSK0 = (1 << OCIE1A); // output compare match A interrupt enable
 		TIMSK0 |= (1 << TOIE0); // overflow interrupt enable
 	} if (u == 1) {
@@ -62,3 +62,27 @@ void PWM::setDuty(double d) {
 		OCR0A = (unsigned int)(0xff * d);
 }
 
+void PWM::setPrescaler(int n) {
+	switch(n) {
+		case 1: prescaler = 0b1;
+		break;
+		case 8: prescaler = 0b10;
+		break;
+		case 64: prescaler = 0b11;
+		break;
+		case 256: prescaler = 0b100;
+		break;
+		case 1024: prescaler = 0b101;
+		break;
+	}
+}
+
+void PWM::start() {
+	if(PWM_number == 0)
+		TCCR0B = (0 << WGM02) | prescaler;
+}
+
+void PWM::stop() {
+	if(PWM_number == 0)
+		TCCR0B = (0 << WGM02);
+}
