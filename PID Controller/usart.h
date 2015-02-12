@@ -14,7 +14,8 @@ unsigned int convertBaud(unsigned int baud);
 void USART_Init(unsigned int ubrr);
 void USART_Sendbyte( unsigned char data );
 void USART_Send_string(const char *str);
-void USART_Send_int(unsigned int d);
+void USART_Send_uint(uint32_t u);
+void USART_Send_int(int16_t i);
 
 unsigned char USART_Receive( void );
 

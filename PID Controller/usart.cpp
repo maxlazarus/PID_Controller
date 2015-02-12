@@ -4,11 +4,11 @@
  * Created: 07/12/2011 15:17:35
  *  Author: Boomber
  */
-#include "usart.h"
 #include <avr/io.h>
-#include <avr/interrupt.h>
-#include <avr/pgmspace.h>
+#include <math.h>
+#include <string.h>
 #include <stdio.h> // Conversions
+#include "usart.h"
 
 unsigned int convertBaud(unsigned int baud) {
 	return (((((FOSC * 10) / (16L * baud)) + 5) / 10) - 1);
@@ -34,9 +34,15 @@ void USART_Send_string(const char *str) {
 	USART_Sendbyte(*str++);	
 }
 
-void USART_Send_int(unsigned int u) {
+void USART_Send_uint(uint32_t u) {
+	char str[20];
+	sprintf(str, "%lu", u);
+	USART_Send_string(str);
+}
+
+void USART_Send_int(int16_t i) {
 	char str[10];
-	sprintf(str, "%u", u);
+	sprintf(str, "%d", i);
 	USART_Send_string(str);
 }
 
