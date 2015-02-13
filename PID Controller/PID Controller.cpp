@@ -151,9 +151,10 @@ int main(void) {
 	int32_t P = 0, I = (int32_t)desiredPosition - getPosition(), D = 0;
 	int32_t E = 0, lastE = 0;
 	double speed;
+	char str[20];
 	
 	while(0) {
-		Motor::setSpeed(0.15);
+		Motor::setSpeed(0.5);
 		_delay_ms(1);
 		print("Position: ", (uint32_t)getPosition());
 		_delay_ms(1);
@@ -169,26 +170,31 @@ int main(void) {
 				desiredPosition = 3000;
 		}
 		
+		lastPosition = position;
 		position = getPosition();
+		/*
 		if(lastPosition < 250 && position > 16250)
 			E = (int32_t)desiredPosition - (0xFFFF - position);
 		else if(lastPosition > 16250 && position < 250)
 			E = (int32_t)desiredPosition - (0xFFFF + position);
 		else
-			E = (int32_t)desiredPosition - position;
-		lastPosition = position;
+		*/
+	
+		lastE = E;	
+		E = (int32_t)desiredPosition - position;
 		
 		P = E;
 		I = I + E;
 		D = lastE - E;
-		lastE = E;
 		
-		speed = (double)(P + D) / 1000.0;
+		speed = (double)(5 * D + 0.5 * P) / 1000;
 		//print("dTheta:   ", (uint32_t)dTheta);
 	
 		Motor::setSpeed(speed);
 		//print("Speed:    ", speed);
 		//print("Desired:  ", desiredPosition);
+		sprintf(str, "%u,", position);
+		USART_Send_string(str);
 		//print("Position: ", (uint32_t)position);
 	}
 	
