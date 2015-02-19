@@ -124,6 +124,12 @@ ISR(INT0_vect) {
 }
 ISR(TIMER0_COMPA_vect) {}
 ISR(TIMER0_OVF_vect) {}
+volatile uint8_t analogLow = 0, analogHigh = 0;
+ISR(ADC_vect) {
+	analogLow = ADCL;
+	analogHigh = ADCH;
+	// print("ADC: ", (uint32_t)analogIn);
+}
 
 int main(void) {
 	
@@ -131,7 +137,8 @@ int main(void) {
 	
 	DDRB = 0b11110000;	//B5 output: board LED
 	DDRD = 0b11111111;
-	DDRC = 0b11110000;
+	PORTC = 0;
+	DDRC = 0b11100000;
 	PORTD = 0xff;
 	
 	//-Ulfuse:w:0x22:m // argument for AVRdude to get clock out
@@ -139,19 +146,28 @@ int main(void) {
 	//USART_Init(convertBaud(19200)); // motor serial speed
 	USART_Init(convertBaud(57600)); // computer com speed
 	
-	ADMUX = 0b1100000;
-	ADCSRA = 0b10000011;
-	ADCSRB = 0b00000000;
-
-	SREG = SREG | 0x80;
-	sei(); // enable global interrupts
+	ADMUX  = 0b01100100; // port A4 ADC selected
+	ADCSRA = 0b10001011; // on, 2x clock
+	ADCSRB = 0b00000000; // free running
+	DIDR0  = 0b00010000;
+	
 	uint16_t count = 0;
 	uint16_t desiredPosition = 3000;
 	uint16_t lastPosition = 0, position = 0;
+	int16_t velocity = 0;
 	int32_t P = 0, I = (int32_t)desiredPosition - getPosition(), D = 0;
 	int32_t E = 0, lastE = 0;
 	double speed;
 	char str[20];
+	uint16_t analogIn = 0;
+	
+	SREG = SREG | 0x80;
+	sei(); // enable global interrupts
+	PRR = 0;
+	
+	while(0) {
+		setBitTo(ADSC, 1, &ADCSRA);
+	}
 	
 	while(0) {
 		Motor::setSpeed(0.5);
@@ -161,6 +177,7 @@ int main(void) {
 	}
 	
 	while(1) {	
+		/*
 		count++;
 		if(count > 5000) {
 			count = 0;
@@ -169,9 +186,12 @@ int main(void) {
 			else
 				desiredPosition = 3000;
 		}
+		*/
 		
 		lastPosition = position;
 		position = getPosition();
+		velocity = position - lastPosition;
+		
 		/*
 		if(lastPosition < 250 && position > 16250)
 			E = (int32_t)desiredPosition - (0xFFFF - position);
@@ -180,22 +200,25 @@ int main(void) {
 		else
 		*/
 	
+		desiredPosition = (10 * (analogHigh << 2) | (analogLow >> 6)) + 6000;
 		lastE = E;	
-		E = (int32_t)desiredPosition - position;
+		E = (int32_t)desiredPosition - position; 
 		
 		P = E;
 		I = I + E;
 		D = lastE - E;
 		
-		speed = (double)(5 * D + 0.5 * P) / 1000;
-		//print("dTheta:   ", (uint32_t)dTheta);
+		speed = (double)(2 * D + 0.5 * P) / 1000;
 	
 		Motor::setSpeed(speed);
-		//print("Speed:    ", speed);
-		//print("Desired:  ", desiredPosition);
+		/*
 		sprintf(str, "%u,", position);
 		USART_Send_string(str);
-		//print("Position: ", (uint32_t)position);
+		*/
+		sprintf(str, "%i,", velocity);
+		USART_Send_string(str);
+		
+		setBitTo(ADSC, 1, &ADCSRA); // ADC read start
 	}
 	
     while(1) {
