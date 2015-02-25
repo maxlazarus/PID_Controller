@@ -46,6 +46,6 @@ grid on;
 
 ... plot(t, A, 'red');
 ... plot(t, C, 'green');
-plot(t, D, 'Color', [0.5, 0, 1]);
-plot(t, E, 'blue');
+... plot(t, D, 'Color', [0.5, 0, 1]);
+... plot(t, E, 'blue');
 plot(t, B, 'white');
