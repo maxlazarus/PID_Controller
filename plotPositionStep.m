@@ -1,48 +1,32 @@
-transferFunctions;
+variables;
+[Gm, G, H] = createSystem(K_m, T_m, w_max_unloaded, 0);
 
 clf;
+numFiles = 5;
+fileNames = cell(numFiles, 1);
+fileNames{1} = ['P2positionStep.csv'];
+fileNames{2} = ['P1positionStep.csv'];
+fileNames{3} = ['P0_75positionStep.csv'];
+fileNames{4} = ['P0_5positionStep.csv'];
+fileNames{5} = ['P0_2positionStep.csv'];
 
-figure(1);
-x = normalize('P0_2positionStep.csv');
-plot(t, x);
-setGraphStyle();
-PID = pid(0.2, 0, 0);
-system = PID * G / (PID * G * H + 1);
-step(system);
-setGraphStyle();
+    
+PIDvalues = [[2, 0, 0]', [1, 0, 0]', [0.75, 0, 0]', [0.5, 0, 0]', [0.2, 0, 0]'];
 
-figure(2);
-x = normalize('P0_5positionStep.csv');
-plot(t, x);
-setGraphStyle();
-PID = pid(0.5, 0, 0);
-system = PID * G / (PID * G * H + 1);
-step(system);
-setGraphStyle();
+for i = 1:numFiles
+    % disp(('Hello I am the number ',int2str(i)));
+    if (i > 1)
+        figure;
+    end
+  
+    x = normalize(fileNames{i});
+    plot(t, x);
 
-figure(3);
-x = normalize('P0_75positionStep.csv');
-plot(t, x);
-setGraphStyle();
-PID = pid(0.75, 0, 0);
-system = PID * G / (PID * G * H + 1);
-step(system);
-setGraphStyle();
+    hold on;
+    
+    PID = pid(PIDvalues(1, i), PIDvalues(2, i), PIDvalues(3, i));
+    system = PID * G / (PID * G * H + 1);
+    step(system);
 
-figure(4);
-setGraphStyle();
-x = normalize('P1positionStep.csv');
-plot(t, x);
-PID = pid(1, 0, 0);
-system = PID * G / (PID * G * H + 1);
-step(system);
-setGraphStyle();
-
-figure(5);
-setGraphStyle();
-x = normalize('P2positionStep.csv');
-plot(t, x);
-PID = pid(2, 0, 0);
-system = PID * G / (PID * G * H + 1);
-step(system);
-setGraphStyle();
+    setGraphStyle(strcat('UNLOADED, P =', num2str(PIDvalues(1, i))));
+end

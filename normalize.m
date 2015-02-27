@@ -1,7 +1,7 @@
-function [ x ] = normalize(filename, seconds)
+function [ x ] = normalize(filename)
 
     controlFrequency = 500; % Hz
-    length = controlFrequency * seconds;
+    length = controlFrequency;
     ticksPerRadian = 12000 / (2 * pi);
     
     x = csvread(filename);

@@ -1,19 +1,24 @@
-% x = normalize('pos500.csv');
-x = normalize('long_bar.csv', 1);
+variables;
 
-v = d(x);
-% a = dSmooth(v, 1);
+fileName = 'long_bar.csv';
+w_max = w_max_long_bar;
+J = J_long_bar;
+titleText = 'VELOCITY STEP RESPONSE - LONG BAR';
 
-dt = 1 / controlFrequency; % seconds
-t = (0:dt:0.999999);
+plotResponse; % variables above passed implicitly
+figure;
 
-setGraphStyle();
+fileName = 'velocityShortLoaded.csv';
+w_max = w_max_unloaded;
+J = J_short_bar + J_nut;
+titleText = 'VELOCITY STEP RESPONSE - SHORT BAR WITH NUT';
 
-plot(t, x);
-plot(t, v);
+plotResponse; % variables above passed implicitly
+figure;
 
-transferFunctions;
-step(t, motorDynamics);
-step(t, G);
+fileName = 'pos500.csv';
+w_max = w_max_unloaded;
+J = 0;
+titleText = 'VELOCITY STEP RESPONSE - UNLOADED';
 
-setGraphStyle();
+plotResponse; % variables above passed implicitly

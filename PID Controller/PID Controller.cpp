@@ -20,6 +20,7 @@
 #define HCTL_CLK_BIT 6
 #define DATA_HIGH_NIBBLE (PINC << 4)
 #define DATA_LOW_NIBBLE PINB
+#define ADC10BIT ((analogHigh << 2) | (analogLow >> 6))
 // conversion constants
 #define PI 3.1415926
 #define TICKS_TO_RADIANS 0.0005236 // (2 * PI) / 12000
@@ -56,7 +57,7 @@ volatile uint8_t analogLow = 0, analogHigh = 0;
 uint16_t desiredPosition = 3000;
 uint16_t lastPosition = 0, position = 0, zero = 0;
 int16_t velocity = 0;
-int64_t I = 0;
+int32_t I = 0;
 int32_t P = 0, D = 0;
 int32_t E = 0, lastE = 0;
 double speed;
@@ -127,16 +128,13 @@ int main(void) {
 	
 	while(1) {
 
-		desiredPosition = (uint16_t)(ADC_TO_HALF_REV * ((analogHigh << 2) | (analogLow >> 6)) + 6000);
+		desiredPosition = (uint16_t)(ADC_TO_HALF_REV * ADC10BIT + 6000);
 		// desiredPosition = 6000;
-		Kp = 0.37;
-		Ki = 0;
-		Kd = 0.04;
+		Kp = 0.4;
+		Ki = 0.04;
+		Kd = 0.2;
 		
 		if(!panelButton.isUp()) {
-			Kp = 2;
-			Ki = 0;
-			Kd = 0;
 			
 			for(int i = 0; i < 1; i++) {
 				cli();
@@ -206,8 +204,9 @@ void softSerial(uint8_t message) {
 
 void velocityStep(double d) {
 	
-	if(!panelButton.isUp()) {		
-		Motor::setSpeed(d);
+	if(!panelButton.isUp()) {
+		Motor::setSpeed(0.2);
+		// Motor::setSpeed((ADC10BIT - 512) / 512);
 		sprintf(str, "%lu,", (uint32_t)getPosition());
 		USART_Send_string(str);
 	} else {
@@ -225,7 +224,14 @@ void controlSequence() {
 	E = (int32_t)desiredPosition - position;
 		
 	P = E;
-	I = (int64_t)((I + E) * 0.986233); // decays to 0.5 * I after 0.1 s if no E
+	I = I + E;
+	
+	if(I > RADIANS_TO_TICKS)
+		I = RADIANS_TO_TICKS;
+	else if(I < -RADIANS_TO_TICKS)
+		I = -RADIANS_TO_TICKS;
+	
+	// I = (int64_t)((I + E) * 0.986233); // decays to 0.5 * I after 0.1 s if no E
 	D = E - lastE;
 		
 	speed = (double)(Kp * P + Ki * I + Kd * D) * TICKS_TO_RADIANS;
