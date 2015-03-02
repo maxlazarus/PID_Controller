@@ -1,3 +1,10 @@
+/*
+ *  button.h
+ *  February 2015
+ *  Author: Max Prokopenko
+ *  max@theprogrammingclub.com
+ */ 
+
 #ifndef button_h
 #define button_h
 

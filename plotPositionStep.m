@@ -20,13 +20,15 @@ for i = 1:numFiles
     end
   
     x = normalize(fileNames{i});
-    plot(t, x);
+    plot(t, x, '.', 'MarkerSize', 5);
 
     hold on;
     
     PID = pid(PIDvalues(1, i), PIDvalues(2, i), PIDvalues(3, i));
     system = PID * G / (PID * G * H + 1);
     step(system);
+    
+    legend('Measured position (rad)', 'Modelled position (rad)');
 
     setGraphStyle(strcat('UNLOADED, P =', num2str(PIDvalues(1, i))));
 end

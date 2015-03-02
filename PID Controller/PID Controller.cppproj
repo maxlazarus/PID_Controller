@@ -126,10 +126,6 @@
       <SubType>compile</SubType>
       <Link>PID Controller.cpp</Link>
     </Compile>
-    <Compile Include="PWM.cpp">
-      <SubType>compile</SubType>
-      <Link>PWM.cpp</Link>
-    </Compile>
     <Compile Include="PWM.h">
       <SubType>compile</SubType>
       <Link>PWM.h</Link>

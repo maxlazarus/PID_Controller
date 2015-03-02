@@ -11,7 +11,7 @@
  *   D6:	PWM0 out
  */ 
 
-#include "F_CPU.h"
+#include "F_CPU.h" // clock speed
 
 #define CONTROL_PORT PORTD
 #define HCTL_BYTE_SELECT_BIT 2
@@ -26,6 +26,9 @@
 #define TICKS_TO_RADIANS 0.0005236 // (2 * PI) / 12000
 #define RADIANS_TO_TICKS 1910 // 12000 / (2 * PI)
 #define ADC_TO_HALF_REV 5.859 // 6000 / 1024
+#define HALF_REV 6000
+#define SOFT_SERIAL_BAUDRATE 9600 // 38400
+#define SOFT_SERIAL_DELAY (2000000 / SOFT_SERIAL_BAUDRATE)
 
 #include <avr/io.h>
 #include <math.h>
@@ -45,16 +48,21 @@ uint16_t getPosition();
 unsigned int TIM16_ReadTCNT1();
 void setBitTo(uint8_t bit, uint8_t value, volatile uint8_t *reg);
 void softSerial(uint8_t message);
+void testServoController();
 
 //--------------CONTROLLER GAINS--------------//
 	
 double Kp, Ki, Kd;
 
+//------------------GLOBAL FLAGS
+
+volatile bool debug = false;
+volatile bool controllable = true;
+
 //------------------VARIABLES
 
-bool debug = false;
 volatile uint8_t analogLow = 0, analogHigh = 0;
-uint16_t desiredPosition = 3000;
+uint16_t desiredPosition = HALF_REV;
 uint16_t lastPosition = 0, position = 0, zero = 0;
 int16_t velocity = 0;
 int32_t I = 0;
@@ -77,23 +85,20 @@ class Motor {
 				d = 1;
 			else if(d < -1)
 				d = -1;
-			//USART_Sendbyte((uint8_t)(192 + (d * 63.5)));
 			softSerial((uint8_t)(192 + (d * 63.5)));
 		}
 };
 
 //------------------INTERRUPT SERVICE ROUTINES
 
-ISR(TIMER1_OVF_vect) {USART_Send_string("TIMER1_OVF\n");}
 ISR(TIMER1_COMPA_vect) {
 	
 	TCNT1 = 0; // restart control cycle
-	controlSequence();
-	// velocityStep(1);
+	if(controllable)
+		controlSequence();
+	else
+		velocityStep(1);
 }
-ISR(INT0_vect) {}
-ISR(TIMER0_COMPA_vect) {}
-ISR(TIMER0_OVF_vect) {}
 ISR(ADC_vect) {
 	
 	analogLow = ADCL;
@@ -103,8 +108,6 @@ ISR(ADC_vect) {
 //------------------MAIN
 
 int main(void) {
-	
-	// pwm0.setDuty(0.2); // pwm set to clock output at the moment
 	
 	DDRB = 0b11110000;	//B5 output: board LED
 	DDRD = 0b11111111;
@@ -120,21 +123,21 @@ int main(void) {
 	ADMUX  = 0b01100110; // port A6 ADC selected
 	ADCSRA = 0b10001011; // on, 2x clock
 	ADCSRB = 0b00000000; // free running
+
+	Kp = 0.4;
+	Ki = 0.04;
+	Kd = 0.2;
 	
-	SREG = SREG | 0x80;
 	sei(); // enable global interrupts
+	
 	externalClock.start();
 	controlCycle.start();
 	
 	while(1) {
-
-		desiredPosition = (uint16_t)(ADC_TO_HALF_REV * ADC10BIT + 6000);
-		// desiredPosition = 6000;
-		Kp = 0.4;
-		Ki = 0.04;
-		Kd = 0.2;
 		
 		if(!panelButton.isUp()) {
+			
+			controllable = false;
 			
 			for(int i = 0; i < 1; i++) {
 				cli();
@@ -143,6 +146,8 @@ int main(void) {
 				sei();
 				_delay_ms(1000);
 			}
+		} else {
+			controllable = true;
 		}
 	}
 }
@@ -190,23 +195,22 @@ void softSerial(uint8_t message) {
 	
 	uint8_t serialByte = message ^ 0xff;
 	setBitTo(MOTOR_BIT_1, 0, &CONTROL_PORT);
-	_delay_us(51);
+	_delay_us(SOFT_SERIAL_DELAY);
 	
 	for(uint8_t i = 1; i < 8; i++) {
 		setBitTo(MOTOR_BIT_1, serialByte & 1, &CONTROL_PORT);
 		serialByte = serialByte >> 1;
-		_delay_us(51);
+		_delay_us(SOFT_SERIAL_DELAY);
 	}
 	
 	setBitTo(MOTOR_BIT_1, 1, &CONTROL_PORT);
-	_delay_us(52);
+	_delay_us(SOFT_SERIAL_DELAY + 1);
 }
 
 void velocityStep(double d) {
 	
 	if(!panelButton.isUp()) {
-		Motor::setSpeed(0.2);
-		// Motor::setSpeed((ADC10BIT - 512) / 512);
+		Motor::setSpeed(d);
 		sprintf(str, "%lu,", (uint32_t)getPosition());
 		USART_Send_string(str);
 	} else {
@@ -216,22 +220,22 @@ void velocityStep(double d) {
 
 void controlSequence() {
 	
+	if(controllable)
+		desiredPosition = (uint16_t)(ADC_TO_HALF_REV * ADC10BIT + HALF_REV);
 	lastPosition = position;
 	position = getPosition();
-	velocity = position - lastPosition;
+	velocity = position - lastPosition;	
 		
 	lastE = E;
 	E = (int32_t)desiredPosition - position;
 		
 	P = E;
 	I = I + E;
-	
+	// limiting I to prevent instability
 	if(I > RADIANS_TO_TICKS)
 		I = RADIANS_TO_TICKS;
 	else if(I < -RADIANS_TO_TICKS)
 		I = -RADIANS_TO_TICKS;
-	
-	// I = (int64_t)((I + E) * 0.986233); // decays to 0.5 * I after 0.1 s if no E
 	D = E - lastE;
 		
 	speed = (double)(Kp * P + Ki * I + Kd * D) * TICKS_TO_RADIANS;
@@ -244,4 +248,23 @@ void controlSequence() {
 	}
 	
 	setBitTo(ADSC, 1, &ADCSRA); // ADC read start
+}
+
+void testServoController() {
+	uint16_t pulseWidth = 0;
+		
+	while(1) {
+		pulseWidth = 400 + 2 * ADC10BIT;
+		setBitTo(ADSC, 1, &ADCSRA); // ADC read start
+			
+		setBitTo(5, 1, &PORTD);
+		for(uint16_t i = 0; i < pulseWidth; i++){
+			_delay_us(1);
+		}
+		setBitTo(5, 0, &PORTD);
+		_delay_ms(10);
+			
+		sprintf(str, "%u,", pulseWidth);
+		USART_Send_string(str);
+	}
 }

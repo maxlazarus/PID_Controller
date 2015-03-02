@@ -20,16 +20,18 @@ for i = 1:numFiles
     end
   
     x = normalize(fileNames{i});
-    plot(t, x);
+    plot(t, x, '.', 'MarkerSize', 5);
 
     hold on;
     
     PID = pid(PIDvalues(1, i), PIDvalues(2, i), PIDvalues(3, i));
     system = PID * G / (PID * G * H + 1);
     step(system);
+    
+    legend('Measured position (rad)', 'Modelled position (rad)');
 
     s = '';
-    s = strcat(s, 'SHORT BAR WITH NUT P =', num2str(PIDvalues(1, i)));
+    s = strcat(s, 'LOADED STEP RESPONSE P =', num2str(PIDvalues(1, i)));
     s = strcat(s, ' I =', num2str(PIDvalues(2, i)));
     s = strcat(s, ' D =', num2str(PIDvalues(3, i)));
     setGraphStyle(s);
