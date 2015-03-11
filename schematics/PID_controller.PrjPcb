@@ -71,6 +71,23 @@ GenerateClassCluster=0
 DocumentUniqueId=
 
 [Document3]
+DocumentPath=..\..\..\..\..\Public\Documents\Altium\AD14\Library\PartsDatabaseV13p2\PartsDatabaseV12.PcbLib
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=1
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=NBXGVWFM
+
+[Document4]
 DocumentPath=..\..\..\..\..\Public\Documents\Altium\AD14\Library\PartsDatabaseV13p1\PartsDatabaseV12.PcbLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -87,7 +104,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=OTKVBXCG
 
-[Document4]
+[Document5]
 DocumentPath=..\library\controllerPcbLib.PcbLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -104,7 +121,24 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=OKNEWKBD
 
-[Document5]
+[Document6]
+DocumentPath=..\..\..\..\..\Public\Documents\Altium\AD14\Library\PartsDatabaseV13p2\PartsDatabaseV12.SchLib
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=1
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=OUPWGGHD
+
+[Document7]
 DocumentPath=..\..\..\..\..\Public\Documents\Altium\AD14\Library\PartsDatabaseV13p1\PartsDatabaseV12.SchLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -121,7 +155,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=OUPWGGHD
 
-[Document6]
+[Document8]
 DocumentPath=..\library\controllerSchLib.SchLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -138,7 +172,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=HEHTURNT
 
-[Document7]
+[Document9]
 DocumentPath=..\..\..\..\..\Public\Documents\Altium\AD14\Library\Miscellaneous Connectors.IntLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -155,7 +189,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=
 
-[Document8]
+[Document10]
 DocumentPath=..\..\..\..\..\Public\Documents\Altium\AD14\Library\Miscellaneous Devices.IntLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -172,7 +206,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=
 
-[Document9]
+[Document11]
 DocumentPath=..\..\..\..\..\Public\Documents\Altium\AD14\Library\PartsDatabaseV12.IntLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -189,7 +223,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=
 
-[Document10]
+[Document12]
 DocumentPath=..\..\..\..\..\Public\Documents\Altium\AD14\Library\PartsDatabaseV13p1.IntLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -205,6 +239,23 @@ ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=
+
+[Document13]
+DocumentPath=motherboard.PcbDoc
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=1
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=UHVYVUID
 
 [Configuration1]
 Name=Default Configuration
