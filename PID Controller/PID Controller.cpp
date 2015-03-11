@@ -130,6 +130,19 @@ int main(void) {
 	
 	sei(); // enable global interrupts
 	
+	while(1) {
+		// double testSpeed = (double)(ADC10BIT - 512) / 512;
+		// sprintf(str, "%d,", ADC10BIT);
+		// USART_Send_string(str);
+		setBitTo(ADSC, 1, &ADCSRA); // ADC read start
+		for(int i = 0; i < 1024; i++) {
+			if(i < ADC10BIT)
+				setBitTo(MOTOR_BIT_1, 1, &CONTROL_PORT);
+			else
+				setBitTo(MOTOR_BIT_1, 0, &CONTROL_PORT);
+		}
+	}
+	
 	externalClock.start();
 	controlCycle.start();
 	
