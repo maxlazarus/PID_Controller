@@ -30,8 +30,8 @@
 #define RADIANS_TO_TICKS 1910 // 12000 / (2 * PI)
 #define ADC_TO_HALF_REV 5.859 // 6000 / 1024
 #define HALF_REV 6000
-#define SOFT_SERIAL_BAUDRATE 9600 // 38400
-#define SOFT_SERIAL_DELAY (2000000 / SOFT_SERIAL_BAUDRATE)
+#define SOFT_SERIAL_BAUDRATE 19200
+#define SOFT_SERIAL_DELAY (1000000 / SOFT_SERIAL_BAUDRATE)
 
 #include <avr/io.h>
 #include <math.h>
@@ -138,10 +138,10 @@ int main(void) {
 	externalClock.start();
 	
 	while(1) {
+		// both motors controlled by potentiometer
 		motor2.setDuty(ADC10BIT * ADC_TO_DOUBLE);
 		setBitTo(ADSC, 1, &ADCSRA); // ADC read start
-		// sprintf(str, "%u\n", ADC10BIT);
-		// USART_Send_string(str);
+		Motor::setSpeed(ADC10BIT * ADC_TO_DOUBLE);
 		_delay_ms(50);
 	}
 	
@@ -214,11 +214,11 @@ void softSerial(uint8_t message) {
 	for(uint8_t i = 1; i < 8; i++) {
 		setBitTo(MOTOR1, serialByte & 1, &CONTROL_PORT);
 		serialByte = serialByte >> 1;
-		_delay_us(SOFT_SERIAL_DELAY);
+		_delay_us(SOFT_SERIAL_DELAY - 1);
 	}
 	
 	setBitTo(MOTOR1, 1, &CONTROL_PORT);
-	_delay_us(SOFT_SERIAL_DELAY + 1);
+	_delay_us(SOFT_SERIAL_DELAY);
 }
 
 void velocityStep(double d) {

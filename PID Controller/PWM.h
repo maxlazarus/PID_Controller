@@ -79,6 +79,6 @@ void PWM::stop() {
 
 void PWM::setDuty(double d) {
 	if(this->PWM_number == 2) {
-		OCR2B = (uint8_t)(OCR2A * d);
+		OCR2B = (uint8_t)(OCR2A * (1 - d));
 	}
 }
