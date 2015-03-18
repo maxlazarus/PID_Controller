@@ -25,6 +25,7 @@ class PWM {
 #include <avr/io.h>
 
 #define TIMER_1_FREQUENCY 500 // Hz
+#define TIMER_2_FREQUENCY 3000 // Hz
 
 PWM::PWM (unsigned short u) {
 	PWM_number = u;
@@ -34,17 +35,23 @@ PWM::PWM (unsigned short u) {
 void PWM::init() {
 	PRR = 0; // disable all power reduction
 	
-	if(PWM_number == 0) { // init counter0 on pin D6
+	if(this->PWM_number == 0) { // init counter0 on pin D6
 		OCR0A = 0x01;
 		OCR0B = 0x03;
 		TCCR0A = (0 << COM0A1) | (1 << COM0A0) | (1 << WGM01) | (1 << WGM00);
 		// TIMSK0 = (1 << OCIE1A) | (1 << OCIE1B);
 		// TIMSK0 |= (1 << TOIE0);
-		} else if (PWM_number == 1) {
+	} else if (this->PWM_number == 1) {
 		OCR1A = F_CPU / TIMER_1_FREQUENCY;
 		OCR1B = 0;
-		TCCR1A = (0 << COM0A1) | (0 << COM1A0) | (0 << WGM11) | (0 << WGM10);
-		TIMSK1 |= (1 << OCIE1A) | (1 << TOIE0); // timer1 compare, overflow
+		TCCR1A = (0 << COM1A1) | (0 << COM1A0) | (0 << WGM11) | (0 << WGM10);
+		TIMSK1 |= (1 << OCIE1A) | (1 << TOIE1); // timer1 compare, overflow 
+	} else if (this->PWM_number == 2) {
+		OCR2A = 167; // (uint8_t)F_CPU / (TIMER_2_FREQUENCY * 32);
+		OCR2B = 83; // (uint8_t)F_CPU / (TIMER_2_FREQUENCY * 64);
+		TCCR2A = (1 << COM2B1) | (0 << COM2B0) | (1 << WGM21) | (1 << WGM20); // fast PWM
+		TIMSK2 = 0;
+		// TIMSK2 |= (1 << OCIE2B) | (1 << OCIE2A) | (1 << TOIE2); // timer2 compare, overflow		
 	}
 }
 
@@ -53,17 +60,25 @@ unsigned int PWM::read() {return 0;}
 void PWM::start() {
 	if(this->PWM_number == 0) {
 		TCCR0B = (0 << COM0B1) | (0 << COM0B0) | (1 << WGM02) | (1 << CS00);
-		} else {
-		TCCR1B = (0 << WGM13) | (0 << WGM12) | (0 << CS12) | (1 << CS10);
+	} else if (this->PWM_number == 1) {
+		TCCR1B = (0 << WGM13) | (0 << WGM12) | (0 << CS12) | (0 << CS11) | (1 << CS10);
+	} else if (this->PWM_number == 2) {
+		TCCR2B = (1 << WGM22) | (0 << CS22) | (1 << CS21) | (1 << CS20);
 	}
 }
 
 void PWM::stop() {
 	if(this->PWM_number == 0) {
 		TCCR0B = 0;
-		} else {
+	} else if(this->PWM_number == 1) {
 		TCCR1B = 0;
+	} else if(this->PWM_number == 2) {
+		TCCR2B = 0;
 	}
 }
 
-void PWM::setDuty(double d) {}
+void PWM::setDuty(double d) {
+	if(this->PWM_number == 2) {
+		OCR2B = (uint8_t)(OCR2A * d);
+	}
+}

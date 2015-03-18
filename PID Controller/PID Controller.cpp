@@ -15,12 +15,15 @@
 
 #define CONTROL_PORT PORTD
 #define HCTL_BYTE_SELECT_BIT 2
-#define HCTL_ENABLE_BIT 4
-#define MOTOR_BIT_1 5 // soft serial
+#define HCTL_ENABLE_BIT 7
+#define HCTL_SELECT 4
+#define MOTOR1 2 // soft serial
+#define MOTOR2 3 // PWM
 #define HCTL_CLK_BIT 6
 #define DATA_HIGH_NIBBLE (PINC << 4)
 #define DATA_LOW_NIBBLE PINB
 #define ADC10BIT ((analogHigh << 2) | (analogLow >> 6))
+#define ADC_TO_DOUBLE 0.000976562
 // conversion constants
 #define PI 3.1415926
 #define TICKS_TO_RADIANS 0.0005236 // (2 * PI) / 12000
@@ -71,6 +74,7 @@ int32_t E = 0, lastE = 0;
 double speed;
 PWM externalClock(0);
 PWM controlCycle(1);
+PWM motor2(2);
 Button panelButton(5, &PINC);
 char str[20]; // debug output buffer
 double path[] = {1};
@@ -99,8 +103,8 @@ ISR(TIMER1_COMPA_vect) {
 	else
 		velocityStep(1);
 }
+
 ISR(ADC_vect) {
-	
 	analogLow = ADCL;
 	analogHigh = ADCH;
 }
@@ -130,20 +134,17 @@ int main(void) {
 	
 	sei(); // enable global interrupts
 	
+	motor2.start();
+	externalClock.start();
+	
 	while(1) {
-		// double testSpeed = (double)(ADC10BIT - 512) / 512;
-		// sprintf(str, "%d,", ADC10BIT);
-		// USART_Send_string(str);
+		motor2.setDuty(ADC10BIT * ADC_TO_DOUBLE);
 		setBitTo(ADSC, 1, &ADCSRA); // ADC read start
-		for(int i = 0; i < 1024; i++) {
-			if(i < ADC10BIT)
-				setBitTo(MOTOR_BIT_1, 1, &CONTROL_PORT);
-			else
-				setBitTo(MOTOR_BIT_1, 0, &CONTROL_PORT);
-		}
+		// sprintf(str, "%u\n", ADC10BIT);
+		// USART_Send_string(str);
+		_delay_ms(50);
 	}
 	
-	externalClock.start();
 	controlCycle.start();
 	
 	while(1) {
@@ -207,16 +208,16 @@ void setBitTo(uint8_t bit, uint8_t value, volatile uint8_t *reg) {
 void softSerial(uint8_t message) {
 	
 	uint8_t serialByte = message ^ 0xff;
-	setBitTo(MOTOR_BIT_1, 0, &CONTROL_PORT);
+	setBitTo(MOTOR1, 0, &CONTROL_PORT);
 	_delay_us(SOFT_SERIAL_DELAY);
 	
 	for(uint8_t i = 1; i < 8; i++) {
-		setBitTo(MOTOR_BIT_1, serialByte & 1, &CONTROL_PORT);
+		setBitTo(MOTOR1, serialByte & 1, &CONTROL_PORT);
 		serialByte = serialByte >> 1;
 		_delay_us(SOFT_SERIAL_DELAY);
 	}
 	
-	setBitTo(MOTOR_BIT_1, 1, &CONTROL_PORT);
+	setBitTo(MOTOR1, 1, &CONTROL_PORT);
 	_delay_us(SOFT_SERIAL_DELAY + 1);
 }
 
