@@ -1,0 +1,105 @@
+Added Component: Designator=C1(RAD-0.3)
+Added Component: Designator=C2(RAD-0.3)
+Added Component: Designator=C3(RAD-0.3)
+Added Component: Designator=C4(RAD-0.3)
+Added Component: Designator=CDRIVE(HDR1X5_LGE1.0)
+Added Component: Designator=CTL IN(HDR2X4_LGE1.0)
+Added Component: Designator=EN1(HDR1X3_LGE1.0)
+Added Component: Designator=EN2(HDR1X3_LGE1.0)
+Added Component: Designator=ENCX(HDR1X4_LGE1.0)
+Added Component: Designator=ENCY(HDR1X4_LGE1.0)
+Added Component: Designator=LX(HDR1X2_LGE1.0)
+Added Component: Designator=LY(HDR1X2_LGE1.0)
+Added Component: Designator=PWR(KLD_XLGE1.2)
+Added Component: Designator=R1(Res10mm_LGE1.0)
+Added Component: Designator=R2(Res10mm_LGE1.0)
+Added Component: Designator=U1(SOIC50P295X100-32L16N)
+Added Pin To Net: NetName=DGND Pin=C1-1
+Added Pin To Net: NetName=VCC Pin=C1-2
+Added Pin To Net: NetName=DGND Pin=C2-1
+Added Pin To Net: NetName=VCC Pin=C2-2
+Added Pin To Net: NetName=DGND Pin=C3-1
+Added Pin To Net: NetName=VCC Pin=C3-2
+Added Pin To Net: NetName=DGND Pin=C4-1
+Added Pin To Net: NetName=VCC Pin=C4-2
+Added Pin To Net: NetName=VCC Pin=CDRIVE-1
+Added Pin To Net: NetName=DGND Pin=CDRIVE-2
+Added Pin To Net: NetName=M1 SERIAL Pin=CDRIVE-3
+Added Pin To Net: NetName=PGND Pin=CDRIVE-4
+Added Pin To Net: NetName=VPOWER Pin=CDRIVE-5
+Added Pin To Net: NetName=VCC Pin=CTL IN-1
+Added Pin To Net: NetName=DGND Pin=CTL IN-3
+Added Pin To Net: NetName=ALT1 Pin=CTL IN-5
+Added Pin To Net: NetName=ALT2 Pin=CTL IN-7
+Added Pin To Net: NetName=VCC Pin=EN1-1
+Added Pin To Net: NetName=NetEN1_2 Pin=EN1-2
+Added Pin To Net: NetName=DGND Pin=EN1-3
+Added Pin To Net: NetName=VCC Pin=EN2-1
+Added Pin To Net: NetName=NetEN2_2 Pin=EN2-2
+Added Pin To Net: NetName=DGND Pin=EN2-3
+Added Pin To Net: NetName=VCC Pin=ENCX-1
+Added Pin To Net: NetName=DGND Pin=ENCX-2
+Added Pin To Net: NetName=CHAX Pin=ENCX-3
+Added Pin To Net: NetName=CHBX Pin=ENCX-4
+Added Pin To Net: NetName=VCC Pin=ENCY-1
+Added Pin To Net: NetName=DGND Pin=ENCY-2
+Added Pin To Net: NetName=CHAY Pin=ENCY-3
+Added Pin To Net: NetName=CHBY Pin=ENCY-4
+Added Pin To Net: NetName=NetLX_1 Pin=LX-1
+Added Pin To Net: NetName=DGND Pin=LX-2
+Added Pin To Net: NetName=NetLY_1 Pin=LY-1
+Added Pin To Net: NetName=DGND Pin=LY-2
+Added Pin To Net: NetName=PGND Pin=PWR-1
+Added Pin To Net: NetName=VPOWER Pin=PWR-2
+Added Pin To Net: NetName=NetLY_1 Pin=R1-1
+Added Pin To Net: NetName=VCC Pin=R1-2
+Added Pin To Net: NetName=NetLX_1 Pin=R2-1
+Added Pin To Net: NetName=VCC Pin=R2-2
+Added Pin To Net: NetName=VCC Pin=U1-1
+Added Pin To Net: NetName=NetEN1_2 Pin=U1-2
+Added Pin To Net: NetName=NetEN2_2 Pin=U1-3
+Added Pin To Net: NetName=D0 Pin=U1-4
+Added Pin To Net: NetName=CLOCK Pin=U1-5
+Added Pin To Net: NetName=BYTE Pin=U1-6
+Added Pin To Net: NetName=ENABLE Pin=U1-7
+Added Pin To Net: NetName=D7 Pin=U1-10
+Added Pin To Net: NetName=NetLY_1 Pin=U1-11
+Added Pin To Net: NetName=NetLX_1 Pin=U1-12
+Added Pin To Net: NetName=CHBY Pin=U1-13
+Added Pin To Net: NetName=CHBX Pin=U1-14
+Added Pin To Net: NetName=CHAX Pin=U1-15
+Added Pin To Net: NetName=CHAY Pin=U1-16
+Added Pin To Net: NetName=DGND Pin=U1-18
+Added Pin To Net: NetName=D6 Pin=U1-20
+Added Pin To Net: NetName=D5 Pin=U1-21
+Added Pin To Net: NetName=D4 Pin=U1-22
+Added Pin To Net: NetName=DGND Pin=U1-26
+Added Pin To Net: NetName=D3 Pin=U1-29
+Added Pin To Net: NetName=D2 Pin=U1-30
+Added Pin To Net: NetName=D1 Pin=U1-31
+Added Pin To Net: NetName=SEL X/Y Pin=U1-32
+Added Pin To Net: NetName=NetATMEGA HEADER_8 Pin=CTL IN-2
+Added Net: Name=NetATMEGA HEADER_8
+Added Pin To Net: NetName=NetATMEGA HEADER_9 Pin=CTL IN-4
+Added Net: Name=NetATMEGA HEADER_9
+Added Pin To Net: NetName=NetATMEGA HEADER_10 Pin=CTL IN-6
+Added Net: Name=NetATMEGA HEADER_10
+Added Pin To Net: NetName=NetATMEGA HEADER_11 Pin=CTL IN-8
+Added Net: Name=NetATMEGA HEADER_11
+Added Member To Class: ClassName=motherboard Member=Component C1 
+Added Member To Class: ClassName=motherboard Member=Component C2 
+Added Member To Class: ClassName=motherboard Member=Component C3 
+Added Member To Class: ClassName=motherboard Member=Component C4 
+Added Member To Class: ClassName=motherboard Member=Component CDRIVE Commercial driver
+Added Member To Class: ClassName=motherboard Member=Component CTL IN To arm controller
+Added Member To Class: ClassName=motherboard Member=Component EN1 Jumper
+Added Member To Class: ClassName=motherboard Member=Component EN2 Jumper
+Added Member To Class: ClassName=motherboard Member=Component ENCX Encoder X
+Added Member To Class: ClassName=motherboard Member=Component ENCY Encoder Y
+Added Member To Class: ClassName=motherboard Member=Component LX Limit switch X
+Added Member To Class: ClassName=motherboard Member=Component LY Limit switch Y
+Added Member To Class: ClassName=motherboard Member=Component PWR Power in
+Added Member To Class: ClassName=motherboard Member=Component R1 
+Added Member To Class: ClassName=motherboard Member=Component R2 
+Added Member To Class: ClassName=motherboard Member=Component U1 HCTL2032
+Added Room: Name=motherboard

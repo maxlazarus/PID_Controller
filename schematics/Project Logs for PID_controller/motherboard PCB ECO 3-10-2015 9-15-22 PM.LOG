@@ -1,0 +1,14 @@
+Change Component Comment : Designator=P10 Old Comment=EN1 jumper New Comment=Jumper
+Change Component Comment : Designator=P11 Old Comment=EN2 jumper New Comment=Jumper
+Change Component Designator: OldDesignator=J1 NewDesignator=PWR
+Change Component Designator: OldDesignator=P5 NewDesignator=CDRIVER
+Change Component Designator: OldDesignator=P6 NewDesignator=LY
+Change Component Designator: OldDesignator=P7 NewDesignator=LX
+Change Component Designator: OldDesignator=P8 NewDesignator=ENC Y
+Change Component Designator: OldDesignator=P9 NewDesignator=ENC X
+Change Component Designator: OldDesignator=P10 NewDesignator=EN1
+Change Component Designator: OldDesignator=P11 NewDesignator=EN2
+Change Net Name : Old Net Name=NetP6_1 New Net Name=NetLY_1
+Change Net Name : Old Net Name=NetP7_1 New Net Name=NetLX_1
+Change Net Name : Old Net Name=NetP10_2 New Net Name=NetEN1_2
+Change Net Name : Old Net Name=NetP11_2 New Net Name=NetEN2_2

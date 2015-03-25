@@ -1,0 +1,174 @@
+*************************************************************
+FileName = test.GBR
+AutoAperture = True
+*************************************************************
+Generating : Top Layer
+      File : test.GTL
+
+    Adding Layer      : Top Layer
+
+    Adding Layer      : Mechanical 1
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D10
+    D11
+    D12
+    D13
+*************************************************************
+
+*************************************************************
+Generating : Bottom Layer
+      File : test.GBL
+
+    Adding Layer      : Bottom Layer
+
+    Adding Layer      : Mechanical 1
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D10
+    D11
+    D12
+    D13
+*************************************************************
+
+*************************************************************
+Generating : Bottom Pad Master
+      File : test.GPB
+
+    Adding Layer      : Bottom Layer
+
+    Adding Layer      : Multi-Layer
+
+    Adding Layer      : Mechanical 1
+
+
+Used DCodes :
+    D10
+    D11
+    D12
+    D13
+*************************************************************
+
+*************************************************************
+Generating : Top Pad Master
+      File : test.GPT
+
+    Adding Layer      : Top Layer
+
+    Adding Layer      : Multi-Layer
+
+    Adding Layer      : Mechanical 1
+
+
+Used DCodes :
+    D10
+    D11
+    D12
+    D13
+*************************************************************
+
+*************************************************************
+Generating : Top Overlay
+      File : test.GTO
+
+    Adding Layer      : Top Overlay
+
+    Adding Layer      : Mechanical 1
+
+
+Used DCodes :
+    D10
+    D14
+*************************************************************
+
+*************************************************************
+Generating : Top Solder
+      File : test.GTS
+
+    Adding Layer      : Top Solder
+
+    Adding Layer      : Mechanical 1
+
+    Adding Layer      : Top Layer
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D10
+    D15
+    D16
+    D17
+*************************************************************
+
+*************************************************************
+Generating : Bottom Solder
+      File : test.GBS
+
+    Adding Layer      : Bottom Solder
+
+    Adding Layer      : Mechanical 1
+
+    Adding Layer      : Bottom Layer
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D10
+    D15
+    D16
+    D17
+*************************************************************
+
+*************************************************************
+Generating : Mechanical 1
+      File : test.GM1
+
+    Adding Layer      : Mechanical 1
+
+    Adding Layer      : Mechanical 1
+
+
+Used DCodes :
+    D10
+*************************************************************
+
+*************************************************************
+Generating : Drill Drawing
+      File : test.GD1
+
+    Adding Layer      : Mechanical 1
+
+    Adding Drill Pair : Top Layer-Bottom Layer
+
+    Adding Layer      : Drill Drawing
+
+
+Used DCodes :
+    D10
+    D18
+*************************************************************
+
+*************************************************************
+Generating : Drill Guide
+      File : test.GG1
+
+    Adding Layer      : Mechanical 1
+
+    Adding Drill Pair : Top Layer-Bottom Layer
+
+    Adding Layer      : Drill Guide
+
+
+Used DCodes :
+    D10
+    D18
+*************************************************************
+

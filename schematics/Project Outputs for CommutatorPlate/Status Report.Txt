@@ -1,0 +1,12 @@
+Output: NC Drill Files
+Type  : NC Drill
+From  : Project [CommutatorPlate.PrjPcb]
+   Generated File[commutatorPlate.TXT]
+   Generated File[commutatorPlate.LDP]
+   Generated File[commutatorPlate.DRR]
+
+
+Files Generated   : 3
+Documents Printed : 0
+
+Finished Output Generation At 2:54:27 PM On 3/21/2015

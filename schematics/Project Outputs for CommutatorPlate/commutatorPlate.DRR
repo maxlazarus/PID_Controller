@@ -1,0 +1,15 @@
+---------------------------------------------------------------------------
+NCDrill File Report For: commutatorPlate.PcbDoc   3/21/2015  2:54:27 PM
+---------------------------------------------------------------------------
+
+Layer Pair : Top Layer to Bottom Layer
+ASCII RoundHoles File : commutatorPlate.TXT
+
+Tool         Hole Size           Hole Type     Hole Count Plated       Tool Travel
+---------------------------------------------------------------------------
+T1        39.37mil (1mm)           Round          5                2.40 Inch (61.07 mm)
+T2        196.85mil (4.99999mm)    Round          1                0.00 Inch (0.00 mm)
+---------------------------------------------------------------------------
+Totals                                            6                2.40 Inch (61.07 mm)
+
+Total Processing Time (hh:mm:ss) : 00:00:00

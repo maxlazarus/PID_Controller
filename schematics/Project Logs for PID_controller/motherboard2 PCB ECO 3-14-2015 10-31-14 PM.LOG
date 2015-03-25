@@ -1,0 +1,124 @@
+Added Component: Designator=ATMEGA HEADER(DIP30WIDE)
+Added Component: Designator=C1(RAD-0.3)
+Added Component: Designator=C2(RAD-0.3)
+Added Component: Designator=C3(RAD-0.3)
+Added Component: Designator=C4(RAD-0.3)
+Added Component: Designator=CDRIVE(HDR1X5_LGE1.0)
+Added Component: Designator=CTL IN(HDR2X4_LGE1.0)
+Added Component: Designator=DECODER1(N020D_LGE1.0)
+Added Component: Designator=DECODER2(N020D_LGE1.0)
+Added Component: Designator=ENCX(HDR1X4_LGE1.0)
+Added Component: Designator=ENCY(HDR1X4_LGE1.0)
+Added Component: Designator=LX(HDR1X2_LGE1.0)
+Added Component: Designator=LY(HDR1X2_LGE1.0)
+Added Component: Designator=MUX1(DIP16_LGE1.0)
+Added Component: Designator=MUX2(DIP16_LGE1.0)
+Added Component: Designator=PWR(KLD_XLGE1.2)
+Added Component: Designator=R1(Res10mm_LGE1.0)
+Added Component: Designator=R2(Res10mm_LGE1.0)
+Added Pin To Net: NetName=ALT1 Pin=ATMEGA HEADER-30
+Added Pin To Net: NetName=ALT1 Pin=CTL IN-5
+Added Net: Name=ALT1
+Added Pin To Net: NetName=ALT2 Pin=ATMEGA HEADER-1
+Added Pin To Net: NetName=ALT2 Pin=CTL IN-7
+Added Net: Name=ALT2
+Added Pin To Net: NetName=BYTE Pin=ATMEGA HEADER-23
+Added Net: Name=BYTE
+Added Pin To Net: NetName=CHAX Pin=ENCX-3
+Added Net: Name=CHAX
+Added Pin To Net: NetName=CHAY Pin=ENCY-3
+Added Net: Name=CHAY
+Added Pin To Net: NetName=CHBX Pin=ENCX-4
+Added Net: Name=CHBX
+Added Pin To Net: NetName=CHBY Pin=ENCY-4
+Added Net: Name=CHBY
+Added Pin To Net: NetName=CLOCK Pin=ATMEGA HEADER-24
+Added Net: Name=CLOCK
+Added Pin To Net: NetName=D0 Pin=ATMEGA HEADER-26
+Added Pin To Net: NetName=D0 Pin=MUX1-4
+Added Net: Name=D0
+Added Pin To Net: NetName=D1 Pin=ATMEGA HEADER-27
+Added Pin To Net: NetName=D1 Pin=MUX1-7
+Added Net: Name=D1
+Added Pin To Net: NetName=D2 Pin=ATMEGA HEADER-28
+Added Pin To Net: NetName=D2 Pin=MUX1-9
+Added Net: Name=D2
+Added Pin To Net: NetName=D3 Pin=ATMEGA HEADER-29
+Added Pin To Net: NetName=D3 Pin=MUX1-12
+Added Net: Name=D3
+Added Pin To Net: NetName=D4 Pin=ATMEGA HEADER-4
+Added Pin To Net: NetName=D4 Pin=MUX2-4
+Added Net: Name=D4
+Added Pin To Net: NetName=D5 Pin=ATMEGA HEADER-5
+Added Pin To Net: NetName=D5 Pin=MUX2-7
+Added Net: Name=D5
+Added Pin To Net: NetName=D6 Pin=ATMEGA HEADER-6
+Added Pin To Net: NetName=D6 Pin=MUX2-9
+Added Net: Name=D6
+Added Pin To Net: NetName=D7 Pin=ATMEGA HEADER-7
+Added Pin To Net: NetName=D7 Pin=MUX2-12
+Added Net: Name=D7
+Added Pin To Net: NetName=DGND Pin=ATMEGA HEADER-14
+Added Pin To Net: NetName=DGND Pin=ATMEGA HEADER-19
+Added Pin To Net: NetName=DGND Pin=C1-1
+Added Pin To Net: NetName=DGND Pin=C2-1
+Added Pin To Net: NetName=DGND Pin=C3-1
+Added Pin To Net: NetName=DGND Pin=C4-1
+Added Pin To Net: NetName=DGND Pin=CDRIVE-2
+Added Pin To Net: NetName=DGND Pin=CTL IN-3
+Added Pin To Net: NetName=DGND Pin=DECODER1-12
+Added Pin To Net: NetName=DGND Pin=DECODER2-12
+Added Pin To Net: NetName=DGND Pin=ENCX-2
+Added Pin To Net: NetName=DGND Pin=ENCY-2
+Added Pin To Net: NetName=DGND Pin=LX-2
+Added Pin To Net: NetName=DGND Pin=LY-2
+Added Pin To Net: NetName=DGND Pin=MUX2-8
+Added Net: Name=DGND
+Added Pin To Net: NetName=ENABLE Pin=ATMEGA HEADER-25
+Added Net: Name=ENABLE
+Added Pin To Net: NetName=M1 SERIAL Pin=ATMEGA HEADER-20
+Added Pin To Net: NetName=M1 SERIAL Pin=CDRIVE-3
+Added Net: Name=M1 SERIAL
+Added Pin To Net: NetName=M2 PWM Pin=ATMEGA HEADER-21
+Added Net: Name=M2 PWM
+Added Pin To Net: NetName=NetATMEGA HEADER_8 Pin=ATMEGA HEADER-8
+Added Pin To Net: NetName=NetATMEGA HEADER_8 Pin=CTL IN-2
+Added Net: Name=NetATMEGA HEADER_8
+Added Pin To Net: NetName=NetATMEGA HEADER_9 Pin=ATMEGA HEADER-9
+Added Pin To Net: NetName=NetATMEGA HEADER_9 Pin=CTL IN-4
+Added Net: Name=NetATMEGA HEADER_9
+Added Pin To Net: NetName=NetATMEGA HEADER_10 Pin=ATMEGA HEADER-10
+Added Pin To Net: NetName=NetATMEGA HEADER_10 Pin=CTL IN-6
+Added Net: Name=NetATMEGA HEADER_10
+Added Pin To Net: NetName=NetATMEGA HEADER_11 Pin=ATMEGA HEADER-11
+Added Pin To Net: NetName=NetATMEGA HEADER_11 Pin=CTL IN-8
+Added Net: Name=NetATMEGA HEADER_11
+Added Pin To Net: NetName=NetLY_1 Pin=LY-1
+Added Pin To Net: NetName=NetLY_1 Pin=R1-1
+Added Net: Name=NetLY_1
+Added Pin To Net: NetName=PGND Pin=CDRIVE-4
+Added Pin To Net: NetName=PGND Pin=PWR-1
+Added Net: Name=PGND
+Added Pin To Net: NetName=SEL X/Y Pin=ATMEGA HEADER-22
+Added Pin To Net: NetName=SEL X/Y Pin=MUX1-1
+Added Pin To Net: NetName=SEL X/Y Pin=MUX2-1
+Added Net: Name=SEL X/Y
+Added Pin To Net: NetName=VCC Pin=ATMEGA HEADER-12
+Added Pin To Net: NetName=VCC Pin=C1-2
+Added Pin To Net: NetName=VCC Pin=C2-2
+Added Pin To Net: NetName=VCC Pin=C3-2
+Added Pin To Net: NetName=VCC Pin=C4-2
+Added Pin To Net: NetName=VCC Pin=CDRIVE-1
+Added Pin To Net: NetName=VCC Pin=CTL IN-1
+Added Pin To Net: NetName=VCC Pin=DECODER1-1
+Added Pin To Net: NetName=VCC Pin=DECODER2-1
+Added Pin To Net: NetName=VCC Pin=ENCX-1
+Added Pin To Net: NetName=VCC Pin=ENCY-1
+Added Pin To Net: NetName=VCC Pin=R1-2
+Added Pin To Net: NetName=VCC Pin=R2-2
+Added Net: Name=VCC
+Added Pin To Net: NetName=VPOWER Pin=CDRIVE-5
+Added Pin To Net: NetName=VPOWER Pin=PWR-2
+Added Net: Name=VPOWER
+Added Class: Name=motherboard2
+Added Room: Name=motherboard2

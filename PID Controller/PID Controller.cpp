@@ -8,7 +8,7 @@
 
 #include "F_CPU.h" // clock speed
 
-#define COM_SPEED 57600
+#define COM_SPEED				57600
 #define CONTROL_PORT			PORTD
 #define MOTOR1					2 // soft serial
 #define MOTOR2					3 // PWM
@@ -157,10 +157,6 @@ int main(void) {
 }
 
 //------------------FUNCTIONS
-
-void blorp() {
-	
-}
 
 void selectADC(uint8_t n) {
 	

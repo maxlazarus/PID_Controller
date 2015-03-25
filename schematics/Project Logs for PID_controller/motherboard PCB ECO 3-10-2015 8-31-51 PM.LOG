@@ -1,0 +1,22 @@
+Added Component: Designator=J1(KLD_XLGE1.2)
+Added Pin To Net: NetName=PGND Pin=J1-1
+Added Pin To Net: NetName=VPOWER Pin=J1-2
+Added Pin To Net: NetName=NetP2_9 Pin=P2-1
+Added Pin To Net: NetName=NetP2_10 Pin=P2-2
+Added Pin To Net: NetName=NetP2_11 Pin=P2-3
+Added Pin To Net: NetName=VCC Pin=P2-4
+Added Pin To Net: NetName=DGND Pin=P2-6
+Added Pin To Net: NetName=SEL X/Y Pin=P3-1
+Added Pin To Net: NetName=MUX3 Pin=P3-2
+Added Pin To Net: NetName=MUX2 Pin=P3-3
+Added Pin To Net: NetName=MUX1 Pin=P3-4
+Added Pin To Net: NetName=MUX0 Pin=P3-5
+Added Pin To Net: NetName=ENABLE Pin=P3-6
+Added Pin To Net: NetName=CLOCK Pin=P3-7
+Added Pin To Net: NetName=BYTE Pin=P3-8
+Added Pin To Net: NetName=NIBBLE Pin=P4-1
+Added Pin To Net: NetName=M2 PWM Pin=P4-2
+Added Pin To Net: NetName=M1 SERIAL Pin=P4-3
+Added Pin To Net: NetName=DGND Pin=P4-4
+Added Pin To Net: NetName=NetP4_16 Pin=P4-7
+Added Member To Class: ClassName=motherboard Member=Component J1 C-Pwr

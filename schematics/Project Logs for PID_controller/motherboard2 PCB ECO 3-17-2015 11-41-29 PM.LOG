@@ -1,0 +1,73 @@
+Added Pin To Net: NetName=CLOCK Pin=DECODER1-3
+Added Pin To Net: NetName=BYTE Pin=DECODER1-4
+Added Pin To Net: NetName=ENABLE Pin=DECODER1-5
+Added Pin To Net: NetName=CHBX Pin=DECODER1-9
+Added Pin To Net: NetName=CHAX Pin=DECODER1-10
+Added Pin To Net: NetName=DGND Pin=DECODER1-17
+Added Pin To Net: NetName=CLOCK Pin=DECODER2-3
+Added Pin To Net: NetName=BYTE Pin=DECODER2-4
+Added Pin To Net: NetName=ENABLE Pin=DECODER2-5
+Added Pin To Net: NetName=CHBY Pin=DECODER2-9
+Added Pin To Net: NetName=CHAY Pin=DECODER2-10
+Added Pin To Net: NetName=DGND Pin=DECODER2-17
+Added Pin To Net: NetName=DGND Pin=MUX1-8
+Added Pin To Net: NetName=DGND Pin=MUX1-15
+Added Pin To Net: NetName=VCC Pin=MUX1-16
+Added Pin To Net: NetName=DGND Pin=MUX2-15
+Added Pin To Net: NetName=VCC Pin=MUX2-16
+Added Pin To Net: NetName=NetDECODER1_8 Pin=DECODER1-8
+Added Pin To Net: NetName=NetDECODER1_8 Pin=LX-1
+Added Pin To Net: NetName=NetDECODER1_8 Pin=R1-1
+Added Net: Name=NetDECODER1_8
+Added Pin To Net: NetName=NetDECODER2_8 Pin=DECODER2-8
+Added Pin To Net: NetName=NetDECODER2_8 Pin=LY-1
+Added Pin To Net: NetName=NetDECODER2_8 Pin=R2-1
+Added Net: Name=NetDECODER2_8
+Added Pin To Net: NetName=X0 Pin=DECODER1-2
+Added Pin To Net: NetName=X0 Pin=MUX1-2
+Added Net: Name=X0
+Added Pin To Net: NetName=X1 Pin=DECODER1-20
+Added Pin To Net: NetName=X1 Pin=MUX1-5
+Added Net: Name=X1
+Added Pin To Net: NetName=X2 Pin=DECODER1-19
+Added Pin To Net: NetName=X2 Pin=MUX1-11
+Added Net: Name=X2
+Added Pin To Net: NetName=X3 Pin=DECODER1-18
+Added Pin To Net: NetName=X3 Pin=MUX1-14
+Added Net: Name=X3
+Added Pin To Net: NetName=X4 Pin=DECODER1-15
+Added Pin To Net: NetName=X4 Pin=MUX2-2
+Added Net: Name=X4
+Added Pin To Net: NetName=X5 Pin=DECODER1-14
+Added Pin To Net: NetName=X5 Pin=MUX2-5
+Added Net: Name=X5
+Added Pin To Net: NetName=X6 Pin=DECODER1-13
+Added Pin To Net: NetName=X6 Pin=MUX2-11
+Added Net: Name=X6
+Added Pin To Net: NetName=X7 Pin=DECODER1-7
+Added Pin To Net: NetName=X7 Pin=MUX2-14
+Added Net: Name=X7
+Added Pin To Net: NetName=Y0 Pin=DECODER2-2
+Added Pin To Net: NetName=Y0 Pin=MUX1-3
+Added Net: Name=Y0
+Added Pin To Net: NetName=Y1 Pin=DECODER2-20
+Added Pin To Net: NetName=Y1 Pin=MUX1-6
+Added Net: Name=Y1
+Added Pin To Net: NetName=Y2 Pin=DECODER2-19
+Added Pin To Net: NetName=Y2 Pin=MUX1-10
+Added Net: Name=Y2
+Added Pin To Net: NetName=Y3 Pin=DECODER2-18
+Added Pin To Net: NetName=Y3 Pin=MUX1-13
+Added Net: Name=Y3
+Added Pin To Net: NetName=Y4 Pin=DECODER2-15
+Added Pin To Net: NetName=Y4 Pin=MUX2-3
+Added Net: Name=Y4
+Added Pin To Net: NetName=Y5 Pin=DECODER2-14
+Added Pin To Net: NetName=Y5 Pin=MUX2-6
+Added Net: Name=Y5
+Added Pin To Net: NetName=Y6 Pin=DECODER2-13
+Added Pin To Net: NetName=Y6 Pin=MUX2-10
+Added Net: Name=Y6
+Added Pin To Net: NetName=Y7 Pin=DECODER2-7
+Added Pin To Net: NetName=Y7 Pin=MUX2-13
+Added Net: Name=Y7

@@ -1,0 +1,25 @@
+Added Component: Designator=ATMEGA HEADER(DIP30WIDE)
+Added Pin To Net: NetName=ALT2 Pin=ATMEGA HEADER-1
+Added Pin To Net: NetName=D4 Pin=ATMEGA HEADER-4
+Added Pin To Net: NetName=D5 Pin=ATMEGA HEADER-5
+Added Pin To Net: NetName=D6 Pin=ATMEGA HEADER-6
+Added Pin To Net: NetName=D7 Pin=ATMEGA HEADER-7
+Added Pin To Net: NetName=NetATMEGA HEADER_8 Pin=ATMEGA HEADER-8
+Added Pin To Net: NetName=NetATMEGA HEADER_9 Pin=ATMEGA HEADER-9
+Added Pin To Net: NetName=NetATMEGA HEADER_10 Pin=ATMEGA HEADER-10
+Added Pin To Net: NetName=NetATMEGA HEADER_11 Pin=ATMEGA HEADER-11
+Added Pin To Net: NetName=VCC Pin=ATMEGA HEADER-12
+Added Pin To Net: NetName=DGND Pin=ATMEGA HEADER-14
+Added Pin To Net: NetName=DGND Pin=ATMEGA HEADER-19
+Added Pin To Net: NetName=M1 SERIAL Pin=ATMEGA HEADER-20
+Added Pin To Net: NetName=M2 PWM Pin=ATMEGA HEADER-21
+Added Pin To Net: NetName=SEL X/Y Pin=ATMEGA HEADER-22
+Added Pin To Net: NetName=BYTE Pin=ATMEGA HEADER-23
+Added Pin To Net: NetName=CLOCK Pin=ATMEGA HEADER-24
+Added Pin To Net: NetName=ENABLE Pin=ATMEGA HEADER-25
+Added Pin To Net: NetName=D0 Pin=ATMEGA HEADER-26
+Added Pin To Net: NetName=D1 Pin=ATMEGA HEADER-27
+Added Pin To Net: NetName=D2 Pin=ATMEGA HEADER-28
+Added Pin To Net: NetName=D3 Pin=ATMEGA HEADER-29
+Added Pin To Net: NetName=ALT1 Pin=ATMEGA HEADER-30
+Added Member To Class: ClassName=motherboard Member=Component ATMEGA HEADER NanoHeader

@@ -1,0 +1,89 @@
+*************************************************************
+FileName = commutatorPlate.GBR
+AutoAperture = True
+*************************************************************
+Generating : Top Layer
+      File : commutatorPlate.GTL
+
+    Adding Layer      : Top Layer
+
+    Adding Layer      : Mechanical 1
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D10
+*************************************************************
+
+*************************************************************
+Generating : Bottom Layer
+      File : commutatorPlate.GBL
+
+    Adding Layer      : Bottom Layer
+
+    Adding Layer      : Mechanical 1
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D10
+*************************************************************
+
+*************************************************************
+Generating : Bottom Pad Master
+      File : commutatorPlate.GPB
+
+    Adding Layer      : Bottom Layer
+
+    Adding Layer      : Multi-Layer
+
+    Adding Layer      : Mechanical 1
+
+
+Used DCodes :
+    D10
+*************************************************************
+
+*************************************************************
+Generating : Top Pad Master
+      File : commutatorPlate.GPT
+
+    Adding Layer      : Top Layer
+
+    Adding Layer      : Multi-Layer
+
+    Adding Layer      : Mechanical 1
+
+
+Used DCodes :
+    D10
+*************************************************************
+
+*************************************************************
+Generating : Top Overlay
+      File : commutatorPlate.GTO
+
+    Adding Layer      : Top Overlay
+
+    Adding Layer      : Mechanical 1
+
+
+Used DCodes :
+    D10
+*************************************************************
+
+*************************************************************
+Generating : Mechanical 1
+      File : commutatorPlate.GM1
+
+    Adding Layer      : Mechanical 1
+
+    Adding Layer      : Mechanical 1
+
+
+Used DCodes :
+    D10
+*************************************************************
+
