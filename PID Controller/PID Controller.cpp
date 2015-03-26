@@ -6,16 +6,28 @@
  *  max@theprogrammingclub.com
  */ 
 
-#include "F_CPU.h" // clock speed
-
+#include "F_CPU.h"				// clock speed
 #define COM_SPEED				57600
 #define CONTROL_PORT			PORTD
+// COMMAND LINE OPTIONS FOR FUSE CONTROL
+// -U lfuse:r:-:i -U hfuse:r:-:i -U efuse:r:-:i 
+
+// OLD VALUES - SINGLE MOTOR
+/*
+#define MOTOR1					5 // soft serial
+#define HCTL_BYTE_SELECT_BIT	2
+#define HCTL_CLK_BIT			6
+#define HCTL_ENABLE_BIT			4
+*/
+
+// NEW VALUES - MOTHERBOARD CIRCUIT
 #define MOTOR1					2 // soft serial
 #define MOTOR2					3 // PWM
 #define HCTL_SELECT				4
 #define HCTL_BYTE_SELECT_BIT	5
 #define HCTL_CLK_BIT			6
 #define HCTL_ENABLE_BIT			7
+
 #define DATA_HIGH_NIBBLE (PINC << 4)
 #define DATA_LOW_NIBBLE PINB
 #define ADC10BIT ((analogHigh << 2) | (analogLow >> 6))
@@ -23,10 +35,11 @@
 // conversion constants
 #define ADC_TO_DOUBLE 0.000976562 // 0 to 1.0
 #define PI 3.1415926
-#define TICKS_TO_RADIANS 0.0005236 // (2 * PI) / 12000
-#define RADIANS_TO_TICKS 1910 // 12000 / (2 * PI)
-#define ADC_TO_HALF_REV 5.859 // 6000 / 1024
-#define HALF_REV 6000
+// #define TICKS_PER_ROTATION 400
+#define TICKS_TO_RADIANS 0.015708 // 0.0005236 // (2 * PI) / 12000
+#define RADIANS_TO_TICKS 63.662 // 12000 / (2 * PI)
+#define ADC_TO_HALF_REV 0.19531 // 5.8594 // 6000 / 1024
+#define HALF_REV 200 // 6000
 #define SOFT_SERIAL_BAUDRATE 19200
 #define SOFT_SERIAL_DELAY (1000000 / SOFT_SERIAL_BAUDRATE) // us
 
@@ -96,7 +109,8 @@ ISR(TIMER1_COMPA_vect) {
 	if(controllable)
 		controlSequence();
 	else
-		velocityStep(1);
+		// velocityStep(1);
+		{};
 }
 
 ISR(ADC_vect) {
@@ -109,17 +123,13 @@ ISR(ADC_vect) {
 
 int main(void) {
 	
-	void (*foo)() = blorp;
-	foo = blorp;
-	foo();
-	
 	DDRB = 0b11110000;
 	DDRC = 0b00000000;
 	DDRD = 0b11111111;
 
-	Kp = 0.4;
-	Ki = 0.04;
-	Kd = 0.2;
+	Kp = 1;
+	Ki = 0;
+	Kd = 0.4;
 	
 	selectADC(6);
 	USART_Init(convertBaud(COM_SPEED));
@@ -133,6 +143,9 @@ int main(void) {
 		motor2.setDuty(ADC10BIT * ADC_TO_DOUBLE);
 		Motor::setSpeed(2 * ADC10BIT * ADC_TO_DOUBLE - 1);
 		startADC();
+		_delay_ms(100);
+		sprintf(str, "%lu,", (uint32_t)getPosition());
+		USART_Send_string(str);
 	}
 	
 	controlCycle.start();
@@ -146,12 +159,13 @@ int main(void) {
 			for(int i = 0; i < 1; i++) {
 				cli();
 				debug = true;
-				desiredPosition = (uint16_t)(RADIANS_TO_TICKS * path[i]) + getPosition();
+				desiredPosition = (uint16_t)((double)RADIANS_TO_TICKS * path[i]) + getPosition();
 				sei();
 				_delay_ms(1000);
 			}
 		} else {
 			controllable = true;
+			debug = true;
 		}
 	}
 }
@@ -166,6 +180,9 @@ void selectADC(uint8_t n) {
 }
 
 uint16_t getPosition() {
+	
+	// SELECT X OR Y ENCODER
+	setBitTo(HCTL_SELECT, 1, &CONTROL_PORT);
 	
 	uint16_t count = 0;
 
