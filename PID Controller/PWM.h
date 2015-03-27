@@ -25,7 +25,7 @@ class PWM {
 #include <avr/io.h>
 
 #define TIMER_1_FREQUENCY 500 // Hz
-#define TIMER_2_FREQUENCY 3000 // Hz
+#define TIMER_2_FREQUENCY 20000 // Hz
 
 PWM::PWM (unsigned short u) {
 	PWM_number = u;
@@ -47,8 +47,8 @@ void PWM::init() {
 		TCCR1A = (0 << COM1A1) | (0 << COM1A0) | (0 << WGM11) | (0 << WGM10);
 		TIMSK1 |= (1 << OCIE1A) | (1 << TOIE1); // timer1 compare, overflow 
 	} else if (this->PWM_number == 2) {
-		OCR2A = 167; // (uint8_t)F_CPU / (TIMER_2_FREQUENCY * 32);
-		OCR2B = 83; // (uint8_t)F_CPU / (TIMER_2_FREQUENCY * 64);
+		OCR2A =  167; // (uint8_t)F_CPU / (TIMER_2_FREQUENCY * 32);
+		OCR2B =  83; // (uint8_t)F_CPU / (TIMER_2_FREQUENCY * 64);
 		TCCR2A = (1 << COM2B1) | (0 << COM2B0) | (1 << WGM21) | (1 << WGM20); // fast PWM
 		TIMSK2 = 0;
 		// TIMSK2 |= (1 << OCIE2B) | (1 << OCIE2A) | (1 << TOIE2); // timer2 compare, overflow		

@@ -62,7 +62,7 @@ void setBitTo(uint8_t bit, uint8_t value, volatile uint8_t *reg);
 void softSerial(uint8_t message);
 void startADC();
 void selectADC(uint8_t n);
-void blorp();
+void home();
 
 //--------------CONTROLLER GAINS--------------//
 	
@@ -85,7 +85,7 @@ double speed;
 PWM clockOut(0), controlCycle(1), motor2(2); // timer0, 1, 2
 Button panelButton(5, &PINC);
 char str[20]; // debug output buffer
-double path[] = {1};
+double path[] = {1, 2, 3, 4, 5};
 
 //------------------CLASSES
 
@@ -106,11 +106,7 @@ class Motor {
 ISR(TIMER1_COMPA_vect) {
 	
 	TCNT1 = 0; // restart control cycle
-	if(controllable)
-		controlSequence();
-	else
-		// velocityStep(1);
-		{};
+	controlSequence();
 }
 
 ISR(ADC_vect) {
@@ -128,8 +124,8 @@ int main(void) {
 	DDRD = 0b11111111;
 
 	Kp = 1;
-	Ki = 0;
-	Kd = 0.4;
+	Ki = .5;
+	Kd = 1.41;
 	
 	selectADC(6);
 	USART_Init(convertBaud(COM_SPEED));
@@ -137,8 +133,13 @@ int main(void) {
 	
 	motor2.start();
 	clockOut.start();
+	controllable = true;
+	controlCycle.start();
+	desiredPosition = 1500;
 	
-	while(1) {
+	home();
+	
+	while(0) {
 		// both motors controlled by single potentiometer on A6
 		motor2.setDuty(ADC10BIT * ADC_TO_DOUBLE);
 		Motor::setSpeed(2 * ADC10BIT * ADC_TO_DOUBLE - 1);
@@ -150,16 +151,18 @@ int main(void) {
 	
 	controlCycle.start();
 	
+	while(1) {}
+	
 	while(1) {
 		
 		if(!panelButton.isUp()) {
 			
 			controllable = false;
 			
-			for(int i = 0; i < 1; i++) {
+			for(int i = 0; i < 5; i++) {
 				cli();
 				debug = true;
-				desiredPosition = (uint16_t)((double)RADIANS_TO_TICKS * path[i]) + getPosition();
+				desiredPosition = (uint16_t)((double)200 * path[i]) + getPosition();
 				sei();
 				_delay_ms(1000);
 			}
@@ -172,6 +175,19 @@ int main(void) {
 
 //------------------FUNCTIONS
 
+void home() {
+	bool homed = false;
+	uint32_t currentPosition = 32000;
+	while(!homed) {
+		motor2.setDuty(0.2);
+		currentPosition = getPosition();
+		if(currentPosition > 65000 || currentPosition == 0) {
+			desiredPosition = 1000;
+			homed = true;
+		}
+	}
+}
+
 void selectADC(uint8_t n) {
 	
 		ADMUX  = 0b01100000 | n; // port A6 ADC selected
@@ -182,7 +198,7 @@ void selectADC(uint8_t n) {
 uint16_t getPosition() {
 	
 	// SELECT X OR Y ENCODER
-	setBitTo(HCTL_SELECT, 1, &CONTROL_PORT);
+	setBitTo(HCTL_SELECT, 0, &CONTROL_PORT);
 	
 	uint16_t count = 0;
 
@@ -237,8 +253,10 @@ void velocityStep(double d) {
 
 void controlSequence() {
 	
-	if(controllable)
-		desiredPosition = (uint16_t)(ADC_TO_HALF_REV * ADC10BIT + HALF_REV);
+	if(controllable) {
+		// desiredPosition = (uint16_t)(ADC_TO_HALF_REV * ADC10BIT + HALF_REV);
+		desiredPosition = (uint16_t)(4 * (1023 - ADC10BIT));
+	}
 	lastPosition = position;
 	position = getPosition();
 	velocity = position - lastPosition;	
@@ -257,12 +275,19 @@ void controlSequence() {
 		
 	speed = (double)(Kp * P + Ki * I + Kd * D) * TICKS_TO_RADIANS;
 		
-	Motor::setSpeed(speed);
+	if(speed > 1) 
+		speed = 1;
+	else if(speed < -1)
+		speed = -1;
+	// Motor::setSpeed(speed);
+	motor2.setDuty(speed / 2.0 + 0.5);
 		
+		/*
 	if(debug) {
 		sprintf(str, "%u,", position);
 		USART_Send_string(str);
 	}
+	*/
 	
 	startADC();
 }
