@@ -1,3 +1,6 @@
+#ifndef PWM_H
+#define PWM_H
+
 /*
  * PWM.h
  *
@@ -15,7 +18,8 @@ class PWM {
 	public:
 		PWM(unsigned short i);
 		void init();
-		void setDuty(double d);
+		void setDuty(float f);
+		void setSpeed(float f);
 		unsigned int read();
 		void start();
 		void stop();
@@ -24,8 +28,8 @@ class PWM {
 #include "F_CPU.h"
 #include <avr/io.h>
 
-#define TIMER_1_FREQUENCY 500 // Hz
-#define TIMER_2_FREQUENCY 20000 // Hz
+#define TIMER_1_FREQUENCY 250 // Hz
+#define TIMER_2_FREQUENCY 5000 // Hz
 
 PWM::PWM (unsigned short u) {
 	PWM_number = u;
@@ -47,8 +51,8 @@ void PWM::init() {
 		TCCR1A = (0 << COM1A1) | (0 << COM1A0) | (0 << WGM11) | (0 << WGM10);
 		TIMSK1 |= (1 << OCIE1A) | (1 << TOIE1); // timer1 compare, overflow 
 	} else if (this->PWM_number == 2) {
-		OCR2A =  167; // (uint8_t)F_CPU / (TIMER_2_FREQUENCY * 32);
-		OCR2B =  83; // (uint8_t)F_CPU / (TIMER_2_FREQUENCY * 64);
+		OCR2A = uint8_t(F_CPU / 32 / TIMER_2_FREQUENCY);
+		// OCR2B =  83; // (uint8_t)F_CPU / (TIMER_2_FREQUENCY * 64);
 		TCCR2A = (1 << COM2B1) | (0 << COM2B0) | (1 << WGM21) | (1 << WGM20); // fast PWM
 		TIMSK2 = 0;
 		// TIMSK2 |= (1 << OCIE2B) | (1 << OCIE2A) | (1 << TOIE2); // timer2 compare, overflow		
@@ -77,8 +81,20 @@ void PWM::stop() {
 	}
 }
 
-void PWM::setDuty(double d) {
+void PWM::setDuty(float f) {
 	if(this->PWM_number == 2) {
-		OCR2B = (uint8_t)(OCR2A * (1 - d));
+		OCR2B = (uint8_t)(OCR2A * (1 - f));
 	}
 }
+
+void PWM::setSpeed(float f) {
+	if(this->PWM_number == 2) {
+		if(f > 1)
+			f = 1;
+		else if(f < -1)
+			f = -1;
+		OCR2B = (uint8_t)(OCR2A * (0.5 - f / 2));
+	}
+}
+
+#endif
