@@ -5,8 +5,8 @@
  *  max@theprogrammingclub.com
  */ 
 
-#ifndef button_h
-#define button_h
+#ifndef IO_UTILS_H
+#define IO_UTILS_H
 
 using namespace std;
 
