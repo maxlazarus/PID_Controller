@@ -60,22 +60,26 @@
 #include "io_utils.h"
 #include "master.h"
 
+//------------------ENUMS
+
+enum Color { GREEN, RED, BLUE, OFF };
+
 //------------------PROTOTYPES
 
 void velocityStep(double d);
 void controlSequence();
 uint16_t getPosition(uint8_t encoder);
-void getHighLowPosition(uint8_t encoder, volatile uint8_t* high, volatile uint8_t* low);
 void softSerial(uint8_t message);
 void startADC();
 void selectADC(uint8_t n);
 void linearHome();
 void angularHome();
-void setMotor1Speed(float f);
-void setMotor3Speed(float f);
+void setLinearSpeed(float f);
+void setSolenoid();
 void print_debug_info();
 void updateGlobals();
 void readMaster();
+void setColor(Color c);
 void rectangularToPolar(float x, float y, volatile uint16_t* rOut, volatile uint16_t* thetaOut);
 
 //------------------GLOBAL FLAGS
@@ -95,10 +99,10 @@ Output
 	motorSerial(	MOTOR1,			&CONTROL_PORT,	&DDRD)
 	;
 Input 
-	panelButton(	5,				&PINC,			&DDRC);
+	controlSwitch(	5,				&PINC,			&DDRC);
 PID angular, linear;
 
-volatile uint8_t draw;
+volatile bool solenoid;
 volatile uint16_t count;
 volatile uint8_t analogLow, analogHigh;
 volatile uint16_t left, right;
@@ -133,6 +137,9 @@ int main(void) {
 	DDRC = 0b00000000;
 	DDRD = 0b11111111;
 	
+	motor2.setSpeed(0);
+	softSerial(0);
+	
 	selectADC(6);
 	USART_Init(convertBaud(COM_SPEED));
 	sei(); // enable global interrupts
@@ -143,54 +150,67 @@ int main(void) {
 	
 	angular.setGains(2, 0, 1);
 	linear.setGains(1, 0, 1);
+	setColor(RED);
 	linearHome();
 	
+	desiredR = 65000;
+	desiredTheta = 2048;
+	setLinearSpeed(0); // 0.5f
+	_delay_ms(100);
 	controlCycle.start();
 	
 	while(1) {
+		
 		debug = false;
 		
-		sprintf(str,
-			"%u %u %d\n",
-			(uint16_t)(desiredR),
-			(uint16_t)(desiredTheta),
-			draw
-			);
-		USART_Send_string(str);
+		/*
+		if(controlSwitch.isHigh()) {
+			solenoid = true;
+			setColor(BLUE);
+		} else {
+			solenoid = false;
+			setColor(GREEN);
+		}
+		*/
+		setColor(BLUE);
+		_delay_ms(1000);
+		solenoid = true;
 		
-		_delay_ms(100);
+		setColor(GREEN);
+		_delay_ms(1000);
+		solenoid = false;
+		
+		readMaster();
 	}
 }
 
 //------------------FUNCTIONS
 
-void setMotor1Speed(float f) {
+void setLinearSpeed(float f) {
 	// accepts between -1 (full reverse) and 1 (full forward)
 	if(f > 1)
 		f = 1;
 	else if(f < -1)
 		f = -1;
-	softSerial((uint8_t)(192 + (f * 63.5)));
+	softSerial((uint8_t)(192 - f * 63));
 }
 
-void setMotor3Speed(float f) {
-	// accepts between -1 (full reverse) and 1 (full forward)
-	if(f > 1)
-	f = 1;
-	else if(f < -1)
-	f = -1;
-	softSerial((uint8_t)(64 + (f * 63.5)));
+void setSolenoid() {
+	if(solenoid) 
+		softSerial(127);
+	else
+		softSerial(64);
 }
 
 void linearHome() {
 	
 	bool homed = false;
-	uint32_t currentPosition = 32000;
 	while(!homed) {
-		setMotor1Speed(-0.5f);
+		setLinearSpeed(0.5f);
 		motor2.setSpeed(0);
-		currentPosition = getPosition(ENCODERX);
-		if(currentPosition == 0) {
+		updateGlobals();
+		print_debug_info();
+		if(r == 0) {
 			homed = true;
 		}
 	}
@@ -213,16 +233,14 @@ void readMaster() {
 	
 	selectADC(ADC_LEFT);
 	startADC();
-	_delay_ms(1);
+	_delay_us(5);
 	left = ADC10BIT;
 		
 	selectADC(ADC_RIGHT);
 	startADC();
-	_delay_ms(1);
+	_delay_us(5);
 	right = ADC10BIT;
-		
-	draw = (panelButton.isDown())? 1 : 0;
-		
+	
 	translate(left, right, &xIn, &yIn);
 }
 
@@ -273,11 +291,11 @@ void updateGlobals() {
 
 void softSerial(uint8_t message) {
 	
-	uint8_t serialByte = message ^ 0xff;
+	uint8_t serialByte = message;
 	setBitTo(MOTOR1, 0, &CONTROL_PORT);
 	_delay_us(SOFT_SERIAL_DELAY);
 	
-	for(uint8_t i = 1; i < 8; i++) {
+	for(uint8_t i = 0; i < 8; i++) {
 		setBitTo(MOTOR1, serialByte & 1, &CONTROL_PORT);
 		serialByte = serialByte >> 1;
 		_delay_us(SOFT_SERIAL_DELAY - 1);
@@ -285,49 +303,40 @@ void softSerial(uint8_t message) {
 	
 	setBitTo(MOTOR1, 1, &CONTROL_PORT);
 	_delay_us(SOFT_SERIAL_DELAY);
+	_delay_us(SOFT_SERIAL_DELAY);
 }
 
 void velocityStep(float f) {
 	
-	if(!panelButton.isUp()) {
-		setMotor1Speed(f);
+	if(!controlSwitch.isHigh()) {
+		setLinearSpeed(f);
 		sprintf(str, "%lu,", (uint32_t)getPosition(ENCODERX));
 		USART_Send_string(str);
 	} else {
-		setMotor1Speed(0);
+		setLinearSpeed(0);
 	}
 }
 
 void controlSequence() {
-	
-	alt1.set();
-	
+		
 	updateGlobals();
-	readMaster();
 	
+	/*
 	desiredR = 1150 - (uint16_t)(sqrt(xIn * xIn + yIn * yIn) / (4 * SLIDE_TO_CM));
 	desiredTheta = (uint16_t)((4096 * (atan2(xIn, -yIn) + PI)) / (2 * PI));
+	*/
+	
 	//	rectangularToPolar(xIn, yIn, &desiredR, &desiredTheta);
-	/*
-	if(draw == 1)
-		desiredTheta = 1024;
-	else
-		desiredTheta = 3072;
-	*/	
 		
 	speed = linear.compute(desiredR, r) * SLIDE_TO_CM;
-	setMotor1Speed(speed);
+	setLinearSpeed(speed);
 	
 	speed = angular.compute(desiredTheta, theta) * WHEEL_TO_RADIANS;
 	motor2.setSpeed(speed);
 	
-	alt2.set();
-	
-	alt2.clear();
+	setSolenoid();
 	
 	startADC();
-	
-	alt1.clear();
 }
 
 void startADC() { setBitTo(ADSC, 1, &ADCSRA); }
@@ -335,14 +344,35 @@ void startADC() { setBitTo(ADSC, 1, &ADCSRA); }
 void print_debug_info() {
 	
 	sprintf(str,
-		"d: %u, p: %u\n",
-		(uint16_t)(desiredTheta/* * WHEEL_TO_DEGREES*/),
-		(uint16_t)(theta/* * WHEEL_TO_DEGREES*/)
-	);
+		"%u %u\n",
+		(uint16_t)(r),
+		(uint16_t)(theta)
+		);
 	USART_Send_string(str);
 }
 
 void rectangularToPolar(float x, float y, volatile uint16_t* rOut, volatile uint16_t* thetaOut) {
 	*rOut = (uint16_t)(512 - (sqrt(x * x + y * y) * SLIDE_TO_CM));
 	*thetaOut = (uint16_t)(atan2(x, y) / WHEEL_TO_RADIANS);
+}
+
+void setColor(Color c) {
+	switch(c) {
+		case RED :
+			alt1.set();
+			alt2.clear();
+			break;
+		case GREEN :
+			alt1.set();
+			alt2.set();
+			break;
+		case BLUE :
+			alt1.clear();
+			alt2.set();
+			break;
+		case OFF :
+			alt1.clear();
+			alt2.clear();
+			break;
+	}
 }

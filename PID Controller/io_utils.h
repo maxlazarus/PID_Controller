@@ -51,12 +51,12 @@ class Input : Bit {
 			setBitTo(bit, 0, dir);
 		}
 				
-		bool isUp(void) {
+		bool isHigh(void) {
 			return *(this->port) & (1 << this->bit);
 		}
 		
-		bool isDown(void) {
-			return !isUp();
+		bool isLow(void) {
+			return !isHigh();
 		}
 };
 
