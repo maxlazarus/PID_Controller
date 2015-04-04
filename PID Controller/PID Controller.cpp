@@ -155,32 +155,33 @@ int main(void) {
 	
 	desiredR = 65000;
 	desiredTheta = 2048;
-	setLinearSpeed(0); // 0.5f
-	_delay_ms(100);
+	setLinearSpeed(-0.5f);
+	_delay_ms(500);
+	setLinearSpeed(0);
 	controlCycle.start();
 	
 	while(1) {
-		
+		controllable = false;
 		debug = false;
-		
-		/*
-		if(controlSwitch.isHigh()) {
-			solenoid = true;
-			setColor(BLUE);
-		} else {
-			solenoid = false;
-			setColor(GREEN);
-		}
-		*/
-		setColor(BLUE);
-		_delay_ms(1000);
-		solenoid = true;
 		
 		setColor(GREEN);
 		_delay_ms(1000);
+		solenoid = true;
+		
+		setColor(RED);
+		debug = true;
+		motor2.setSpeed(1);
+		_delay_ms(1000);
+		motor2.setSpeed(-1);
+		_delay_ms(1000);
+		motor2.setSpeed(0);
+		debug = false;
+		
+		setColor(BLUE);
+		_delay_ms(1000);
 		solenoid = false;
 		
-		readMaster();
+		// readMaster();
 	}
 }
 
@@ -210,7 +211,7 @@ void linearHome() {
 		motor2.setSpeed(0);
 		updateGlobals();
 		print_debug_info();
-		if(r == 0) {
+		if(r == 0 && lastR == 0) {
 			homed = true;
 		}
 	}
@@ -308,13 +309,21 @@ void softSerial(uint8_t message) {
 
 void velocityStep(float f) {
 	
+	motor2.setSpeed(1);
+	sprintf(str, "%lu,", (uint32_t)getPosition(ENCODERY));
+	USART_Send_string(str);
+	_delay_ms(1000);
+	motor2.setSpeed(-1);
+	
+	/*
 	if(!controlSwitch.isHigh()) {
 		setLinearSpeed(f);
-		sprintf(str, "%lu,", (uint32_t)getPosition(ENCODERX));
+		sprintf(str, "%lu,", (uint32_t)getPosition(ENCODERY));
 		USART_Send_string(str);
 	} else {
 		setLinearSpeed(0);
 	}
+	*/
 }
 
 void controlSequence() {
@@ -328,15 +337,18 @@ void controlSequence() {
 	
 	//	rectangularToPolar(xIn, yIn, &desiredR, &desiredTheta);
 		
-	speed = linear.compute(desiredR, r) * SLIDE_TO_CM;
-	setLinearSpeed(speed);
-	
-	speed = angular.compute(desiredTheta, theta) * WHEEL_TO_RADIANS;
-	motor2.setSpeed(speed);
+	if(controllable) {
+		speed = linear.compute(desiredR, r) * SLIDE_TO_CM;
+		setLinearSpeed(speed);
+		
+		speed = angular.compute(desiredTheta, theta) * WHEEL_TO_RADIANS;
+		motor2.setSpeed(speed);
+	}
 	
 	setSolenoid();
 	
-	startADC();
+	if(debug)
+		print_debug_info();
 }
 
 void startADC() { setBitTo(ADSC, 1, &ADCSRA); }
