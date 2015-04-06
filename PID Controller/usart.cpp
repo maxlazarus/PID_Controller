@@ -31,7 +31,7 @@ void USART_Sendbyte(unsigned char data) {
 
 void USART_Send_string(const char *str) {
 	while (*str) 
-	USART_Sendbyte(*str++);	
+		USART_Sendbyte(*str++);	
 }
 
 void USART_Send_uint(uint32_t u) {

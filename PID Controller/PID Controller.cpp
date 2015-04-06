@@ -14,6 +14,7 @@
 // measuring linear conversion: 1191 = 100.6mm, 1239 = 149.2mm
 
 #include "F_CPU.h"				// clock speed
+#define CHAR_BUFFER_LENGTH		20
 #define COM_SPEED				57600
 #define CONTROL_PORT			PORTD
 
@@ -66,7 +67,9 @@ enum Color { GREEN, RED, BLUE, OFF };
 
 //------------------PROTOTYPES
 
-void velocityStep(double d);
+void angularVelocityStep();
+void linearVelocityStep();
+void linearPositionStep();
 void controlSequence();
 uint16_t getPosition(uint8_t encoder);
 void softSerial(uint8_t message);
@@ -86,6 +89,7 @@ void rectangularToPolar(float x, float y, volatile uint16_t* rOut, volatile uint
 
 volatile bool debug = false;
 volatile bool controllable = true;
+volatile bool pattern = false;
 
 //------------------VARIABLES
 
@@ -102,18 +106,21 @@ Input
 	controlSwitch(	5,				&PINC,			&DDRC);
 PID angular, linear;
 
+volatile uint16_t centerR = 64871;
 volatile bool solenoid;
 volatile uint16_t count;
 volatile uint8_t analogLow, analogHigh;
 volatile uint16_t left, right;
 volatile float xIn, yIn;
-volatile uint16_t desiredTheta, desiredR;
+volatile uint16_t desiredTheta;
+volatile int16_t desiredR;
 volatile uint16_t r, lastR, theta, lastTheta;
 volatile int16_t angularV, linearV;
 volatile float speed;
 PWM clockOut(0), controlCycle(1), motor2(2); // timer0, 1, 2
-char str[20]; // debug output buffer
-double path[] = {1, 2, 3, 4, 5};
+char strOut[CHAR_BUFFER_LENGTH]; // debug output buffer
+char strIn[CHAR_BUFFER_LENGTH]; // debug input buffer
+float rBuffer[255];
 
 //------------------INTERRUPT SERVICE ROUTINES
 
@@ -144,48 +151,149 @@ int main(void) {
 	USART_Init(convertBaud(COM_SPEED));
 	sei(); // enable global interrupts
 	
+	for(int i = 0; i < 256; i++) {
+		// rBuffer[i] = 50 * sin((8 * PI * i) / 256) + 450;
+		if (i < 128)
+		rBuffer[i] = 4 * i;
+		else
+		rBuffer[i] = 4 * (256 - i);
+	}
+	
 	motor2.start();
 	clockOut.start();
-	controllable = true;
 	
-	angular.setGains(2, 0, 1);
-	linear.setGains(1, 0, 1);
+	debug = false;
+	pattern = false;
+	
+	angular.setGains(1, 0, 0);
+	linear.setGains(2, 0, 0.5f);
+	
 	setColor(RED);
 	linearHome();
-	
-	desiredR = 65000;
-	desiredTheta = 2048;
 	setLinearSpeed(-0.5f);
-	_delay_ms(500);
+	_delay_ms(100);
 	setLinearSpeed(0);
+	
+	desiredR = 0;
+	desiredTheta = 2048;
+	controllable = true;
 	controlCycle.start();
 	
+	setColor(GREEN);
+	
+	char cIn;
+	uint8_t bufferIndex;
+	
 	while(1) {
-		controllable = false;
-		debug = false;
-		
-		setColor(GREEN);
-		_delay_ms(1000);
-		solenoid = true;
-		
-		setColor(RED);
-		debug = true;
-		motor2.setSpeed(1);
-		_delay_ms(1000);
-		motor2.setSpeed(-1);
-		_delay_ms(1000);
-		motor2.setSpeed(0);
-		debug = false;
-		
-		setColor(BLUE);
-		_delay_ms(1000);
-		solenoid = false;
-		
-		// readMaster();
+		switch(cIn = USART_Receive()) {
+			case '?':
+				USART_Send_string("[?scdpar+-0m]\n");
+				break;
+			case 's':
+				solenoid = !solenoid;
+				if(solenoid)
+					USART_Send_string("Solenoid on\n");
+				else
+					USART_Send_string("Solenoid off\n");
+				break;
+			case 'c': 
+				controllable = !controllable;
+				if(controllable)
+					USART_Send_string("Control on\n");
+				else
+					USART_Send_string("Control off\n");
+				break;
+			case 'd':
+				debug = !debug;
+				if(debug)
+					USART_Send_string("Debug on\n");
+				else
+					USART_Send_string("Debug off\n");
+				break;
+			case 'p':
+				pattern = !pattern;
+				if(pattern)
+					USART_Send_string("Pattern on\n");
+				else
+					USART_Send_string("Pattern off\n");
+				break;
+			case 'a':
+				// USART_Send_string("Angular v step\n");
+				angularVelocityStep();
+				break;
+			case 'r':
+				// USART_Send_string("Linear v step\n");
+				// linearVelocityStep();
+				linearPositionStep();
+				break;
+			case '+':
+				desiredR += 10;
+				USART_Send_string("r++\n");
+				break;
+			case '-':
+				desiredR -= 10;
+				USART_Send_string("r--\n");
+				break;
+			case '0':
+				desiredR = 0;
+				desiredTheta = 2048;
+				controllable = true;
+				break;
+			case 'm':
+				centerR = r;
+				USART_Send_string("Setting center\n");
+				break;
+			default :
+				break;
+		}
+		_delay_ms(1);
 	}
 }
 
 //------------------FUNCTIONS
+
+void angularVelocityStep() {
+	setColor(RED);
+	controllable = false;
+	debug = true;
+	solenoid = true;
+	motor2.setSpeed(1);
+	_delay_ms(1000);
+	motor2.setSpeed(-1);
+	_delay_ms(1000);
+	motor2.setSpeed(0);
+	setColor(GREEN);
+	_delay_ms(1000);
+	debug = false;
+}
+
+void linearVelocityStep() {
+	setColor(RED);
+	controllable = false;
+	debug = true;
+	solenoid = true;
+	setLinearSpeed(-1);
+	_delay_ms(100);
+	setLinearSpeed(1);
+	_delay_ms(100);
+	setLinearSpeed(0);
+	setColor(GREEN);
+	_delay_ms(1000);
+	debug = false;
+}
+
+void linearPositionStep() {
+	setColor(RED);
+	controllable = true;
+	solenoid = true;
+	desiredR = -500;
+	_delay_ms(500);
+	debug = true;
+	desiredR = 500;
+	_delay_ms(1000);
+	setColor(GREEN);
+	debug = false;
+}
 
 void setLinearSpeed(float f) {
 	// accepts between -1 (full reverse) and 1 (full forward)
@@ -193,7 +301,7 @@ void setLinearSpeed(float f) {
 		f = 1;
 	else if(f < -1)
 		f = -1;
-	softSerial((uint8_t)(192 - f * 63));
+	softSerial((uint8_t)(192 - f * 63.5));
 }
 
 void setSolenoid() {
@@ -210,7 +318,6 @@ void linearHome() {
 		setLinearSpeed(0.5f);
 		motor2.setSpeed(0);
 		updateGlobals();
-		print_debug_info();
 		if(r == 0 && lastR == 0) {
 			homed = true;
 		}
@@ -307,25 +414,6 @@ void softSerial(uint8_t message) {
 	_delay_us(SOFT_SERIAL_DELAY);
 }
 
-void velocityStep(float f) {
-	
-	motor2.setSpeed(1);
-	sprintf(str, "%lu,", (uint32_t)getPosition(ENCODERY));
-	USART_Send_string(str);
-	_delay_ms(1000);
-	motor2.setSpeed(-1);
-	
-	/*
-	if(!controlSwitch.isHigh()) {
-		setLinearSpeed(f);
-		sprintf(str, "%lu,", (uint32_t)getPosition(ENCODERY));
-		USART_Send_string(str);
-	} else {
-		setLinearSpeed(0);
-	}
-	*/
-}
-
 void controlSequence() {
 		
 	updateGlobals();
@@ -334,11 +422,18 @@ void controlSequence() {
 	desiredR = 1150 - (uint16_t)(sqrt(xIn * xIn + yIn * yIn) / (4 * SLIDE_TO_CM));
 	desiredTheta = (uint16_t)((4096 * (atan2(xIn, -yIn) + PI)) / (2 * PI));
 	*/
+	if(pattern)
+		desiredR = rBuffer[count++ % 256];
 	
 	//	rectangularToPolar(xIn, yIn, &desiredR, &desiredTheta);
 		
+	if(desiredR > 1000)
+		desiredR = 1000;
+	else if(desiredR < -1000)
+		desiredR = -1000;
+		
 	if(controllable) {
-		speed = linear.compute(desiredR, r) * SLIDE_TO_CM;
+		speed = linear.compute(-desiredR, r - centerR) * SLIDE_TO_CM;
 		setLinearSpeed(speed);
 		
 		speed = angular.compute(desiredTheta, theta) * WHEEL_TO_RADIANS;
@@ -355,12 +450,12 @@ void startADC() { setBitTo(ADSC, 1, &ADCSRA); }
 
 void print_debug_info() {
 	
-	sprintf(str,
-		"%u %u\n",
+	sprintf(strOut,
+		"%u, %u\n",
 		(uint16_t)(r),
 		(uint16_t)(theta)
 		);
-	USART_Send_string(str);
+	USART_Send_string(strOut);
 }
 
 void rectangularToPolar(float x, float y, volatile uint16_t* rOut, volatile uint16_t* thetaOut) {
