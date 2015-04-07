@@ -87,12 +87,14 @@ void PWM::setDuty(float f) {
 	}
 }
 
+#define MAX_SPEED 0.5f
+
 void PWM::setSpeed(float f) {
 	if(this->PWM_number == 2) {
-		if(f > 1)
-			f = 1;
-		else if(f < -1)
-			f = -1;
+		if(f > MAX_SPEED)
+			f = MAX_SPEED;
+		else if(f < -MAX_SPEED)
+			f = -MAX_SPEED;
 		OCR2B = (uint8_t)(OCR2A * (0.5 - f / 2));
 	}
 }

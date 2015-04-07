@@ -42,7 +42,7 @@
 #define ADC_TO_DOUBLE			(2 * ADC10BIT * 0.000976562) - 1 // -1.0 to 1.0
 #define PI						3.1415926
 #define SLIDE_TO_CM				0.01
-#define WHEEL_HALF_REVOLUTION	2048 // 24000 for commercial
+#define WHEEL_HALF_REVOLUTION	4096 // 24000 for commercial
 #define WHEEL_TO_RADIANS		PI / WHEEL_HALF_REVOLUTION
 #define WHEEL_TO_DEGREES		180.0 / WHEEL_HALF_REVOLUTION
 #define SOFT_SERIAL_BAUDRATE	19200
@@ -64,6 +64,12 @@
 //------------------ENUMS
 
 enum Color { GREEN, RED, BLUE, OFF };
+enum ControlState { 
+	SW_DOWN_BUTTON_UP,
+	SW_DOWN_BUTTON_DOWN,
+	SW_UP_BUTTON_UP,
+	SW_UP_BUTTON_DOWN
+};
 
 //------------------PROTOTYPES
 
@@ -82,8 +88,9 @@ void setSolenoid();
 void print_debug_info();
 void updateGlobals();
 void readMaster();
+ControlState readSwitches();
 void setColor(Color c);
-void rectangularToPolar(float x, float y, volatile uint16_t* rOut, volatile uint16_t* thetaOut);
+void rectangularToPolar(float x, float y, volatile int16_t* rOut, volatile uint16_t* thetaOut);
 
 //------------------GLOBAL FLAGS
 
@@ -103,10 +110,13 @@ Output
 	motorSerial(	MOTOR1,			&CONTROL_PORT,	&DDRD)
 	;
 Input 
-	controlSwitch(	5,				&PINC,			&DDRC);
+	angularLimit(	4,				&PINC,			&DDRC),
+	controlSwitch(	5,				&PINC,			&DDRC)
+	;
 PID angular, linear;
 
-volatile uint16_t centerR = 64871;
+volatile uint16_t angleOffset = 0;
+volatile uint16_t centerR = 64895;
 volatile bool solenoid;
 volatile uint16_t count;
 volatile uint8_t analogLow, analogHigh;
@@ -145,7 +155,8 @@ int main(void) {
 	DDRD = 0b11111111;
 	
 	motor2.setSpeed(0);
-	softSerial(0);
+	solenoid = true;
+	setSolenoid();
 	
 	selectADC(6);
 	USART_Init(convertBaud(COM_SPEED));
@@ -165,17 +176,18 @@ int main(void) {
 	debug = false;
 	pattern = false;
 	
-	angular.setGains(1, 0, 0);
-	linear.setGains(2, 0, 0.5f);
+	angular.setGains(5, 0, 1);
+	linear.setGains(5, 0, 1);
 	
 	setColor(RED);
 	linearHome();
 	setLinearSpeed(-0.5f);
 	_delay_ms(100);
 	setLinearSpeed(0);
+	angularHome();
 	
 	desiredR = 0;
-	desiredTheta = 2048;
+	desiredTheta = 4096;
 	controllable = true;
 	controlCycle.start();
 	
@@ -183,6 +195,37 @@ int main(void) {
 	
 	char cIn;
 	uint8_t bufferIndex;
+	bool pressed = false;
+
+	while(1) {
+		switch(readSwitches()) {
+			case SW_DOWN_BUTTON_DOWN:
+				if(!pressed) {
+					pressed = true;
+				}
+				pressed = true;
+				break;
+			case SW_DOWN_BUTTON_UP:
+				pressed = false;
+				break;
+			case SW_UP_BUTTON_DOWN:
+				if(!pressed) {
+					setColor(RED);
+					readMaster();
+					rectangularToPolar(xIn, yIn, &desiredR, &desiredTheta);
+					sprintf(strOut, "%d, %u\n", desiredR, desiredTheta);
+					// sprintf(strOut, "%d, %d\n", int16_t(xIn * 1000), int16_t(yIn * 1000));
+					// USART_Send_string(strOut);
+					debug = true;
+					pressed = true;
+				}
+				break;
+			case SW_UP_BUTTON_UP:
+				pressed = false;
+				setColor(GREEN);
+				break;
+		}
+	}
 	
 	while(1) {
 		switch(cIn = USART_Receive()) {
@@ -212,10 +255,14 @@ int main(void) {
 				break;
 			case 'p':
 				pattern = !pattern;
-				if(pattern)
+				if(pattern) {
 					USART_Send_string("Pattern on\n");
-				else
+					solenoid = false;
+					setColor(BLUE);
+				} else {
 					USART_Send_string("Pattern off\n");
+					solenoid = true;
+				}
 				break;
 			case 'a':
 				// USART_Send_string("Angular v step\n");
@@ -224,7 +271,7 @@ int main(void) {
 			case 'r':
 				// USART_Send_string("Linear v step\n");
 				// linearVelocityStep();
-				linearPositionStep();
+				linearVelocityStep();
 				break;
 			case '+':
 				desiredR += 10;
@@ -252,14 +299,15 @@ int main(void) {
 
 //------------------FUNCTIONS
 
+#define MAX_SPEED 0.5f
+
 void angularVelocityStep() {
 	setColor(RED);
 	controllable = false;
+	_delay_ms(500);
 	debug = true;
 	solenoid = true;
-	motor2.setSpeed(1);
-	_delay_ms(1000);
-	motor2.setSpeed(-1);
+	motor2.setSpeed(MAX_SPEED);
 	_delay_ms(1000);
 	motor2.setSpeed(0);
 	setColor(GREEN);
@@ -270,10 +318,12 @@ void angularVelocityStep() {
 void linearVelocityStep() {
 	setColor(RED);
 	controllable = false;
-	debug = true;
 	solenoid = true;
 	setLinearSpeed(-1);
-	_delay_ms(100);
+	_delay_ms(150);
+	setLinearSpeed(0);
+	_delay_ms(250);
+	debug = true;
 	setLinearSpeed(1);
 	_delay_ms(100);
 	setLinearSpeed(0);
@@ -291,6 +341,17 @@ void linearPositionStep() {
 	debug = true;
 	desiredR = 500;
 	_delay_ms(1000);
+	setColor(GREEN);
+	debug = false;
+}
+
+void angularPositionStep() {
+	setColor(RED);
+	controllable = true;
+	solenoid = true;
+	desiredTheta = theta + 1 / WHEEL_TO_RADIANS;
+	debug = true;
+	_delay_ms(2000);
 	setColor(GREEN);
 	debug = false;
 }
@@ -313,6 +374,7 @@ void setSolenoid() {
 
 void linearHome() {
 	
+	solenoid = true;
 	bool homed = false;
 	while(!homed) {
 		setLinearSpeed(0.5f);
@@ -326,12 +388,12 @@ void linearHome() {
 
 void angularHome() {
 	
+	solenoid = true;
 	bool homed = false;
-	uint32_t currentPosition = 32000;
 	while(!homed) {
-		motor2.setSpeed(-0.5f);
-		currentPosition = getPosition(ENCODERY);
-		if(currentPosition > 65000 || currentPosition == 0) {
+		motor2.setSpeed(0.5f);
+		if(angularLimit.isLow()) {
+			angleOffset = getPosition(ENCODERY) % 8192;
 			homed = true;
 		}
 	}
@@ -341,15 +403,31 @@ void readMaster() {
 	
 	selectADC(ADC_LEFT);
 	startADC();
-	_delay_us(5);
+	_delay_us(25);
 	left = ADC10BIT;
 		
 	selectADC(ADC_RIGHT);
 	startADC();
-	_delay_us(5);
+	_delay_us(25);
 	right = ADC10BIT;
 	
 	translate(left, right, &xIn, &yIn);
+}
+
+ControlState readSwitches() {
+	
+	selectADC(5);
+	startADC();
+	_delay_us(5);
+	uint16_t control = ADC10BIT;
+	if(control > 975)
+		return SW_DOWN_BUTTON_UP;
+	else if(control > 750)
+		return SW_DOWN_BUTTON_DOWN;
+	else if(control > 350)
+		return SW_UP_BUTTON_UP;
+	else 
+		return SW_UP_BUTTON_DOWN;
 }
 
 void selectADC(uint8_t n) {
@@ -390,9 +468,9 @@ void updateGlobals() {
 	linearV = r - lastR;
 	
 	lastTheta = theta;
-	theta = getPosition(ENCODERY) % 4096;
-	if(lastTheta > 2048 && theta < 2048)
-		angularV = 4096 + theta - lastTheta;
+	theta = getPosition(ENCODERY) % 8192;
+	if(lastTheta > 4096 && theta < 4096)
+		angularV = 8192 + theta - lastTheta;
 	else
 		angularV = theta - lastTheta;
 }
@@ -419,24 +497,35 @@ void controlSequence() {
 	updateGlobals();
 	
 	/*
-	desiredR = 1150 - (uint16_t)(sqrt(xIn * xIn + yIn * yIn) / (4 * SLIDE_TO_CM));
+	desiredR = (uint16_t)(sqrt(xIn * xIn + yIn * yIn) / (4 * SLIDE_TO_CM));
 	desiredTheta = (uint16_t)((4096 * (atan2(xIn, -yIn) + PI)) / (2 * PI));
 	*/
-	if(pattern)
-		desiredR = rBuffer[count++ % 256];
+	#define R_LENGTH 500
 	
+	if(pattern) {
+		float tRad = PI * theta / 4096;
+
+		if (theta < 2048)
+			desiredR = R_LENGTH / (sin(tRad) + cos(tRad));
+		else if (theta < 4096)
+			desiredR = R_LENGTH / (sin(tRad) - cos(tRad));
+		else if (theta < 6144)
+			desiredR = R_LENGTH / (sin(-tRad) - cos(tRad));
+		else
+			desiredR = R_LENGTH / (sin(-tRad) + cos(tRad));
+		// desiredR = rBuffer[count++ % 256];
+	}
 	//	rectangularToPolar(xIn, yIn, &desiredR, &desiredTheta);
 		
-	if(desiredR > 1000)
-		desiredR = 1000;
-	else if(desiredR < -1000)
-		desiredR = -1000;
+	if(desiredR > 600)
+		desiredR = 600;
+	else if(desiredR < -600)
+		desiredR = -600;
 		
 	if(controllable) {
 		speed = linear.compute(-desiredR, r - centerR) * SLIDE_TO_CM;
-		setLinearSpeed(speed);
-		
-		speed = angular.compute(desiredTheta, theta) * WHEEL_TO_RADIANS;
+		setLinearSpeed(speed);		
+		speed = angular.compute(desiredTheta, ((theta + 8000 -angleOffset) % 8192) * WHEEL_TO_RADIANS);
 		motor2.setSpeed(speed);
 	}
 	
@@ -449,18 +538,24 @@ void controlSequence() {
 void startADC() { setBitTo(ADSC, 1, &ADCSRA); }
 
 void print_debug_info() {
-	
+	/*
+	sprintf(strOut,
+		"%d, %u\n",
+		desiredR,
+		r - centerR
+		);
+		*/
 	sprintf(strOut,
 		"%u, %u\n",
-		(uint16_t)(r),
-		(uint16_t)(theta)
+		desiredTheta,
+		theta
 		);
 	USART_Send_string(strOut);
 }
 
-void rectangularToPolar(float x, float y, volatile uint16_t* rOut, volatile uint16_t* thetaOut) {
-	*rOut = (uint16_t)(512 - (sqrt(x * x + y * y) * SLIDE_TO_CM));
-	*thetaOut = (uint16_t)(atan2(x, y) / WHEEL_TO_RADIANS);
+void rectangularToPolar(float x, float y, volatile int16_t* rOut, volatile uint16_t* thetaOut) {
+	*rOut = (int16_t)(sqrt(x * x + y * y) * 50);
+	*thetaOut = (uint16_t)((atan2(x, -y) + PI) * 1304);
 }
 
 void setColor(Color c) {
@@ -470,11 +565,11 @@ void setColor(Color c) {
 			alt2.clear();
 			break;
 		case GREEN :
-			alt1.set();
+			alt1.clear();
 			alt2.set();
 			break;
 		case BLUE :
-			alt1.clear();
+			alt1.set();
 			alt2.set();
 			break;
 		case OFF :
