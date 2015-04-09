@@ -55,6 +55,7 @@
 #include <stdio.h>
 #include <util/delay.h> 
 #include <avr/interrupt.h>
+#include <stdlib.h>
 #include "usart.h"
 #include "PWM.h"
 #include "PID.h"
@@ -63,7 +64,12 @@
 
 //------------------ENUMS
 
-enum Color { GREEN, RED, BLUE, OFF };
+enum Color { 
+	GREEN, 
+	RED, 
+	BLUE, 
+	OFF 
+};
 enum ControlState { 
 	SW_DOWN_BUTTON_UP,
 	SW_DOWN_BUTTON_DOWN,
@@ -74,6 +80,7 @@ enum ControlState {
 //------------------PROTOTYPES
 
 void angularVelocityStep();
+void angularPositionStep();
 void linearVelocityStep();
 void linearPositionStep();
 void controlSequence();
@@ -97,6 +104,7 @@ void rectangularToPolar(float x, float y, volatile int16_t* rOut, volatile uint1
 volatile bool debug = false;
 volatile bool controllable = true;
 volatile bool pattern = false;
+volatile bool angularOverride = false;
 
 //------------------VARIABLES
 
@@ -116,7 +124,7 @@ Input
 PID angular, linear;
 
 volatile uint16_t angleOffset = 0;
-volatile uint16_t centerR = 64895;
+volatile uint16_t centerR = 64870;
 volatile bool solenoid;
 volatile uint16_t count;
 volatile uint8_t analogLow, analogHigh;
@@ -124,8 +132,9 @@ volatile uint16_t left, right;
 volatile float xIn, yIn;
 volatile uint16_t desiredTheta;
 volatile int16_t desiredR;
-volatile uint16_t r, lastR, theta, lastTheta;
-volatile int16_t angularV, linearV;
+volatile uint16_t r, theta, lastTheta;
+volatile uint16_t lastR[] = {1, 2, 3};
+volatile int16_t angularV, lastAngularV, linearV;
 volatile float speed;
 PWM clockOut(0), controlCycle(1), motor2(2); // timer0, 1, 2
 char strOut[CHAR_BUFFER_LENGTH]; // debug output buffer
@@ -154,6 +163,8 @@ int main(void) {
 	DDRC = 0b00000000;
 	DDRD = 0b11111111;
 	
+	_delay_ms(250);
+	
 	motor2.setSpeed(0);
 	solenoid = true;
 	setSolenoid();
@@ -176,8 +187,8 @@ int main(void) {
 	debug = false;
 	pattern = false;
 	
-	angular.setGains(5, 0, 1);
-	linear.setGains(5, 0, 1);
+	angular.setGains(10, 0, 1);
+	linear.setGains(5, 0.03f, 1);
 	
 	setColor(RED);
 	linearHome();
@@ -197,6 +208,10 @@ int main(void) {
 	uint8_t bufferIndex;
 	bool pressed = false;
 
+	while(0) {
+		debug = true;
+	}
+
 	while(1) {
 		switch(readSwitches()) {
 			case SW_DOWN_BUTTON_DOWN:
@@ -206,22 +221,43 @@ int main(void) {
 				pressed = true;
 				break;
 			case SW_DOWN_BUTTON_UP:
+				solenoid = false;
 				pressed = false;
+				pattern = true;
+				setColor(BLUE);
+				angularOverride = true;
+				motor2.setSpeed(0.35f);
 				break;
 			case SW_UP_BUTTON_DOWN:
+				debug = true;
 				if(!pressed) {
 					setColor(RED);
 					readMaster();
 					rectangularToPolar(xIn, yIn, &desiredR, &desiredTheta);
-					sprintf(strOut, "%d, %u\n", desiredR, desiredTheta);
+					// sprintf(strOut, "%d, %u\n", desiredR, desiredTheta);
 					// sprintf(strOut, "%d, %d\n", int16_t(xIn * 1000), int16_t(yIn * 1000));
 					// USART_Send_string(strOut);
-					debug = true;
+					// debug = true;
 					pressed = true;
+					pattern = false;
+					_delay_ms(1000);
+					while(
+						abs(theta - desiredTheta) > 100 ||
+						angularV > 0 || angularV < 0 ||
+						lastAngularV > 0 || lastAngularV < 0
+						) {}
+					solenoid = false;
+					setColor(BLUE);
+					_delay_ms(200);
+					solenoid = true;
 				}
 				break;
 			case SW_UP_BUTTON_UP:
+				debug = true;
+				solenoid = true;
+				angularOverride = false;
 				pressed = false;
+				pattern = false;
 				setColor(GREEN);
 				break;
 		}
@@ -266,12 +302,14 @@ int main(void) {
 				break;
 			case 'a':
 				// USART_Send_string("Angular v step\n");
-				angularVelocityStep();
+				// angularVelocityStep();
+				angularPositionStep();
 				break;
 			case 'r':
 				// USART_Send_string("Linear v step\n");
 				// linearVelocityStep();
-				linearVelocityStep();
+				// linearVelocityStep();
+				linearPositionStep();
 				break;
 			case '+':
 				desiredR += 10;
@@ -298,8 +336,6 @@ int main(void) {
 }
 
 //------------------FUNCTIONS
-
-#define MAX_SPEED 0.5f
 
 void angularVelocityStep() {
 	setColor(RED);
@@ -336,6 +372,7 @@ void linearPositionStep() {
 	setColor(RED);
 	controllable = true;
 	solenoid = true;
+	setSolenoid();
 	desiredR = -500;
 	_delay_ms(500);
 	debug = true;
@@ -349,7 +386,10 @@ void angularPositionStep() {
 	setColor(RED);
 	controllable = true;
 	solenoid = true;
-	desiredTheta = theta + 1 / WHEEL_TO_RADIANS;
+	setSolenoid();
+	desiredTheta = 2048;
+	_delay_ms(4000);
+	desiredTheta = 3355;
 	debug = true;
 	_delay_ms(2000);
 	setColor(GREEN);
@@ -375,20 +415,23 @@ void setSolenoid() {
 void linearHome() {
 	
 	solenoid = true;
+	setSolenoid();
 	bool homed = false;
 	while(!homed) {
 		setLinearSpeed(0.5f);
 		motor2.setSpeed(0);
 		updateGlobals();
-		if(r == 0 && lastR == 0) {
+		if(r == 0 && lastR[0] == 0 && lastR[1] == 0 && lastR[2] == 0) {
 			homed = true;
 		}
+		print_debug_info();
 	}
 }
 
 void angularHome() {
 	
 	solenoid = true;
+	setSolenoid();
 	bool homed = false;
 	while(!homed) {
 		motor2.setSpeed(0.5f);
@@ -397,6 +440,7 @@ void angularHome() {
 			homed = true;
 		}
 	}
+	motor2.setSpeed(0);
 }
 
 void readMaster() {
@@ -463,12 +507,15 @@ uint16_t getPosition(uint8_t encoder) {
 
 void updateGlobals() {
 	
-	lastR = r;
+	lastR[2] = lastR[1];
+	lastR[1] = lastR[0];
+	lastR[0] = r;
 	r = getPosition(ENCODERX);
-	linearV = r - lastR;
+	linearV = r - lastR[0];
 	
 	lastTheta = theta;
 	theta = getPosition(ENCODERY) % 8192;
+	lastAngularV = angularV;
 	if(lastTheta > 4096 && theta < 4096)
 		angularV = 8192 + theta - lastTheta;
 	else
@@ -525,8 +572,11 @@ void controlSequence() {
 	if(controllable) {
 		speed = linear.compute(-desiredR, r - centerR) * SLIDE_TO_CM;
 		setLinearSpeed(speed);		
-		speed = angular.compute(desiredTheta, ((theta + 8000 -angleOffset) % 8192) * WHEEL_TO_RADIANS);
-		motor2.setSpeed(speed);
+		// theta + 8000 -angleOffset
+		if(!angularOverride) {
+			speed = angular.compute(desiredTheta, theta) * WHEEL_TO_RADIANS;
+			motor2.setSpeed(speed);
+		}
 	}
 	
 	setSolenoid();
@@ -538,23 +588,30 @@ void controlSequence() {
 void startADC() { setBitTo(ADSC, 1, &ADCSRA); }
 
 void print_debug_info() {
+	
 	/*
 	sprintf(strOut,
-		"%d, %u\n",
-		desiredR,
-		r - centerR
+		"%u, %u\n",
+		centerR -desiredR,
+		r
 		);
 		*/
+		
 	sprintf(strOut,
 		"%u, %u\n",
-		desiredTheta,
+		r,
 		theta
 		);
+		
 	USART_Send_string(strOut);
 }
 
 void rectangularToPolar(float x, float y, volatile int16_t* rOut, volatile uint16_t* thetaOut) {
-	*rOut = (int16_t)(sqrt(x * x + y * y) * 50);
+	int16_t t = (int16_t)(sqrt(x * x + y * y) * 25);
+	t -= 80;
+	if(t < 0)
+		t = 0;
+	*rOut = t;
 	*thetaOut = (uint16_t)((atan2(x, -y) + PI) * 1304);
 }
 

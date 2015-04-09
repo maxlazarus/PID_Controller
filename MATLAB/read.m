@@ -1,0 +1,1 @@
+fprintf(fscanf(s1));

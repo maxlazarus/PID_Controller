@@ -1,0 +1,1 @@
+s1 = serial('COM11','BaudRate',57600);
